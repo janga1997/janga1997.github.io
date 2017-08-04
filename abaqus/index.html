@@ -30,8 +30,8 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <!-- The above form looks like this -->
   <div class="container">
-  <hr>
-    <div class="row">
+      <hr>
+      <div class="row">
         <form>
 
           <div class="row">
@@ -43,43 +43,46 @@
           <div class="six columns">
               <label for="numFibres">Number of Fibres</label>
               <input class="u-full-width" type="number" min="0" placeholder="20" id="numFibres" required>
-</div>
-</div>
-<hr>
-<div class="row">
-    <div class="six columns">
-      <label for="fibreProperty">Fibre Property</label>
-      <input type="text" placeholder="Steel" id="fibreProperty" required>
-  </div>
+          </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="six columns">
+          <label for="fibreProperty">Fibre Property</label>
+          <input type="text" placeholder="Steel" id="fibreProperty" required>
+      </div>
 
-  <div class="six columns">
-      <label for="matrixProperty">Matrix Property</label>
-      <input type="text" placeholder="Concrete" id="matrixProperty" required>
+      <div class="six columns">
+          <label for="matrixProperty">Matrix Property</label>
+          <input type="text" placeholder="Concrete" id="matrixProperty" required>
+      </div>
   </div>
-</div>
-<hr>
-<div class="row">
+  <hr>
+  <div class="row">
     <div class="six columns">
-    <label for="packingType">Packing Type</label>
+        <label for="packingType">Packing Type</label>
         <input type="text" id="packingType" placeholder="square" required>
     </div>
 
     <div class="six columns">
-    <label for="elementType">Element Type</label>
-        <input type="text" id="elementType" placeholder="hex" required>
+        <label for="elementType">Element Type</label>
+        <select class="u-full-width" id="elementType">
+            <option value="Option 1">Hex</option>
+            <option value="Option 2">Tetrahedron</option>
+        </select>
     </div>
 </div>
 <hr>
 <div class="row">
 
-<div class="six columns">
-    <label for="meshSeed">Mesh Seed Size</label>
-    <input type="number" min="0" id="meshSeed" placeholder="0" required>
-</div>
+    <div class="six columns">
+        <label for="meshSeed">Mesh Seed Size</label>
+        <input type="number" min="0" id="meshSeed" placeholder="0" required>
+    </div>
 
     <div class="six columns">
         <label for="loading">Loading</label>
-          <select class="u-full-width" id="loading">
+        <select class="u-full-width" id="loading">
             <option value="Option 1">Loading</option>
             <option value="Option 2">Displacement</option>
         </select>
@@ -89,31 +92,31 @@
 <h5 class="six columns offset-by-four u-full-width">Direction of Loading</h5>
 
 <div class="row">
-<div class="two columns offset-by-three">
-    <label for="xComp">X Component</label>
-    <input type="checkbox" id="xComp">
-    <label for="xComp-both">Two Way</label>
-    <input type="checkbox" id="xComp-both">
-</div>
-<div class="two columns">
-    <label for="yComp">Y Component</label>
-    <input type="checkbox" id="yComp">
-    <label for="yComp-both">Two Way</label>
-    <input type="checkbox" id="yComp-both">
-</div>
-<div class="two columns">
-    <label for="zComp">Z Component</label>
-    <input type="checkbox" id="zComp">
-    <label for="zComp-both">Two Way</label>
-    <input type="checkbox" id="zComp-both">
-</div>
+    <div class="two columns offset-by-three">
+        <label for="xComp">X Component</label>
+        <input type="checkbox" id="xComp">
+        <label for="xComp-both">Two Way</label>
+        <input type="checkbox" id="xComp-both">
+    </div>
+    <div class="two columns">
+        <label for="yComp">Y Component</label>
+        <input type="checkbox" id="yComp">
+        <label for="yComp-both">Two Way</label>
+        <input type="checkbox" id="yComp-both">
+    </div>
+    <div class="two columns">
+        <label for="zComp">Z Component</label>
+        <input type="checkbox" id="zComp">
+        <label for="zComp-both">Two Way</label>
+        <input type="checkbox" id="zComp-both">
+    </div>
 </div>
 <hr>
 <div class="row">
-<div class="six columns offset-by-three">
-    <label for="fileName">File Name</label>
-    <input class="u-full-width" type="text" placeholder="script.py" id="fileName" required>
-</div>
+    <div class="six columns offset-by-three">
+        <label for="fileName">File Name</label>
+        <input class="u-full-width" type="text" placeholder="script.py" id="fileName" required>
+    </div>
 </div>
 
 <button style="margin-left: 40%" class="button-primary">Generate Python File</button>
