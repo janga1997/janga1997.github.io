@@ -33,93 +33,110 @@
       <hr>
       <div class="row">
         <form>
+            <h5 style="margin-left: 40%">Matrix Dimensions</h5>
+            <div class="row">
+                <div class="four columns">
+                    <label for="lengthMatrix">Length</label>
+                    <input type="number" id="lengthMatrix" min="0">
+                </div>
+                <div class="four columns">
+                    <label for="breadthMatrix">Breadth</label>
+                    <input type="number" id="breadthMatrix" min="0">
+                </div>
+                <div class="four columns">
+                    <label for="depthMatrix">Depth/Height</label>
+                    <input type="number" id="depthMatrix" min="0">
+                </div>
+            </div>
+            <hr>
 
+            <div class="row">
+
+                <div class="six columns">
+                  <label for="volumeFraction">Volume Fraction</label>
+                  <input class="u-full-width" type="number" min="0" max="1" step="0.001" placeholder="0.5" id="volumeFraction" required>
+              </div>
+
+              <div class="six columns">
+                  <label for="numFibres">Number of Fibres</label>
+                  <input class="u-full-width" type="number" min="0" placeholder="20" id="numFibres" required>
+              </div>
+          </div>
+          <hr>
           <div class="row">
             <div class="six columns">
-              <label for="volumeFraction">Volume Fraction</label>
-              <input class="u-full-width" type="number" min="0" max="1" step="0.001" placeholder="0.5" id="volumeFraction" required>
+              <label for="fibreProperty">Fibre Property</label>
+              <input type="text" placeholder="Steel" id="fibreProperty" required>
           </div>
 
           <div class="six columns">
-              <label for="numFibres">Number of Fibres</label>
-              <input class="u-full-width" type="number" min="0" placeholder="20" id="numFibres" required>
+              <label for="matrixProperty">Matrix Property</label>
+              <input type="text" placeholder="Concrete" id="matrixProperty" required>
           </div>
       </div>
       <hr>
       <div class="row">
         <div class="six columns">
-          <label for="fibreProperty">Fibre Property</label>
-          <input type="text" placeholder="Steel" id="fibreProperty" required>
-      </div>
+            <label for="packingType">Packing Type</label>
+            <input type="text" id="packingType" placeholder="square" required>
+        </div>
 
-      <div class="six columns">
-          <label for="matrixProperty">Matrix Property</label>
-          <input type="text" placeholder="Concrete" id="matrixProperty" required>
-      </div>
-  </div>
-  <hr>
-  <div class="row">
-    <div class="six columns">
-        <label for="packingType">Packing Type</label>
-        <input type="text" id="packingType" placeholder="square" required>
+        <div class="six columns">
+            <label for="elementType">Element Type</label>
+            <select class="u-full-width" id="elementType">
+                <option value="Option 1">Hex</option>
+                <option value="Option 2">Tetrahedron</option>
+            </select>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+
+        <div class="six columns">
+            <label for="meshSeed">Mesh Seed Size</label>
+            <input type="number" min="0" id="meshSeed" placeholder="0" required>
+        </div>
+
+        <div class="six columns">
+            <label for="loading">Loading</label>
+            <select class="u-full-width" id="loading">
+                <option value="Option 1">Loading</option>
+                <option value="Option 2">Displacement</option>
+            </select>
+        </div>
+    </div>
+    <hr>
+    <h5 class="six columns offset-by-four u-full-width">Direction of Loading</h5>
+
+    <div class="row">
+        <div class="two columns offset-by-three">
+            <label for="xComp">X Component</label>
+            <input type="checkbox" id="xComp">
+            <label for="xComp-both">Two Way</label>
+            <input type="checkbox" id="xComp-both">
+        </div>
+        <div class="two columns">
+            <label for="yComp">Y Component</label>
+            <input type="checkbox" id="yComp">
+            <label for="yComp-both">Two Way</label>
+            <input type="checkbox" id="yComp-both">
+        </div>
+        <div class="two columns">
+            <label for="zComp">Z Component</label>
+            <input type="checkbox" id="zComp">
+            <label for="zComp-both">Two Way</label>
+            <input type="checkbox" id="zComp-both">
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="six columns offset-by-three">
+            <label for="fileName">File Name</label>
+            <input class="u-full-width" type="text" placeholder="script.py" id="fileName" required>
+        </div>
     </div>
 
-    <div class="six columns">
-        <label for="elementType">Element Type</label>
-        <select class="u-full-width" id="elementType">
-            <option value="Option 1">Hex</option>
-            <option value="Option 2">Tetrahedron</option>
-        </select>
-    </div>
-</div>
-<hr>
-<div class="row">
-
-    <div class="six columns">
-        <label for="meshSeed">Mesh Seed Size</label>
-        <input type="number" min="0" id="meshSeed" placeholder="0" required>
-    </div>
-
-    <div class="six columns">
-        <label for="loading">Loading</label>
-        <select class="u-full-width" id="loading">
-            <option value="Option 1">Loading</option>
-            <option value="Option 2">Displacement</option>
-        </select>
-    </div>
-</div>
-<hr>
-<h5 class="six columns offset-by-four u-full-width">Direction of Loading</h5>
-
-<div class="row">
-    <div class="two columns offset-by-three">
-        <label for="xComp">X Component</label>
-        <input type="checkbox" id="xComp">
-        <label for="xComp-both">Two Way</label>
-        <input type="checkbox" id="xComp-both">
-    </div>
-    <div class="two columns">
-        <label for="yComp">Y Component</label>
-        <input type="checkbox" id="yComp">
-        <label for="yComp-both">Two Way</label>
-        <input type="checkbox" id="yComp-both">
-    </div>
-    <div class="two columns">
-        <label for="zComp">Z Component</label>
-        <input type="checkbox" id="zComp">
-        <label for="zComp-both">Two Way</label>
-        <input type="checkbox" id="zComp-both">
-    </div>
-</div>
-<hr>
-<div class="row">
-    <div class="six columns offset-by-three">
-        <label for="fileName">File Name</label>
-        <input class="u-full-width" type="text" placeholder="script.py" id="fileName" required>
-    </div>
-</div>
-
-<button style="margin-left: 40%" class="button-primary">Generate Python File</button>
+    <button style="margin-left: 40%" class="button-primary">Generate Python File</button>
 
 </form>
 </div>
@@ -129,6 +146,8 @@
 
 <!-- Note: The class .u-full-width is just a utility class shorthand for width: 100% -->
 
+<script type="text/javascript" src='js/FileSaver.js'></script>
+<script type="text/javascript" src='js/abaqus.js'></script>
 
 <!-- End Document
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
