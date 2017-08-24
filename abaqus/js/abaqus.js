@@ -8,7 +8,7 @@ function generateCS() {
     var fibreRadius = Math.sqrt(volumeFraction * length * breadth/ (Math.PI * numFibres));
     console.log(fibreRadius);
 
-    var sample = bestCandidateSampler(breadth - 2*fibreRadius, length - 2*fibreRadius, numFibres * 10, numFibres, 2 * fibreRadius);
+    var sample = bestCandidateSampler(breadth - 2.1*fibreRadius, length - 2.1*fibreRadius, numFibres * 10, numFibres, 2.1* fibreRadius);
 
     document.getElementById("svgCS").innerHTML = "";
 
@@ -17,6 +17,9 @@ function generateCS() {
     .attr("height", length);
 
     var context = canvas.node().getContext("2d");
+
+    context.fillStyle = "grey";
+    context.fillRect(0, 0, breadth, length);
 
     var hila = 0;
 
@@ -45,19 +48,12 @@ function generateCS() {
       context.beginPath();
       //context.arc(x-center, y-center, radius, startAngle, endAngle, counterclockwise)
       //A circle would thus look like:
-      context.arc(s[0] + fibreRadius, s[1] + fibreRadius, fibreRadius, 0,  2 * Math.PI, true);               
+      context.arc(s[0] + 1.05*fibreRadius, s[1] + 1.05*fibreRadius, fibreRadius, 0,  2 * Math.PI, true);
       context.fill();
       context.closePath();
 
       hila += 1;
-                console.log(hila);
-
-      // svg.append("circle")
-      // .attr("cx", s[0] + fibreRadius)
-      // .attr("cy", s[1] + fibreRadius)
-      // .attr("r", 0)
-      // .transition()
-      // .attr("r", fibreRadius);
+      console.log(hila);
   }
 });
 

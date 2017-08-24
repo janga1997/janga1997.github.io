@@ -35,8 +35,8 @@ function bestCandidateSampler(width, height, numCandidates, numSamplesMax, minDi
   function search(x, y) {
     var x0 = 0,
         y0 = 0,
-        x3 = width,
-        y3 = width,
+        x3 = Math.max(width, height),
+        y3 = Math.max(width, height),
         minDistance2 = Infinity,
         closestPoint;
 
