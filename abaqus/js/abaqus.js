@@ -8,7 +8,7 @@ function generateCS() {
     var fibreRadius = Math.sqrt(volumeFraction * length * breadth/ (Math.PI * numFibres));
     console.log(fibreRadius);
 
-    var sample = bestCandidateSampler(breadth - 2*fibreRadius, length - 2*fibreRadius, numFibres * 100, numFibres, 2 * fibreRadius);
+    var sample = bestCandidateSampler(breadth - 2*fibreRadius, length - 2*fibreRadius, numFibres * 10, numFibres, 2 * fibreRadius);
 
     document.getElementById("svgCS").innerHTML = "";
 
