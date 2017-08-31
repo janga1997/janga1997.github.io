@@ -6,6 +6,7 @@ function generate_random() {
   var volumeFraction = document.getElementById('volumeFraction').value;
 
   var maxRadius = Math.sqrt(volumeFraction * height * width/ (Math.PI * numFibres));
+  var minRadius = maxRadius;
   var newCircle = bestCircleGenerator(1.05*maxRadius, 0.05*maxRadius, width - 2*maxRadius , height - 2*maxRadius);
 
 
@@ -40,27 +41,32 @@ function generate_random() {
       // janga.add(circle[2]);
       count++ ;
 
-    //Drawing a circle
-    context.fillStyle = "rgba(0, 0, 0, " + circle[2]/maxRadius + ")";
-    context.beginPath();
-    //context.arc(x-center, y-center, radius, startAngle, endAngle, counterclockwise)
-    //A circle would thus look like:
-    context.arc(circle[0] + maxRadius, circle[1] + maxRadius, circle[2], 0,  2 * Math.PI, true);
-    context.fill();
-    context.closePath();
+      minRadius = Math.min(minRadius, circle[2]);
 
-    // As we add more circles, generate more candidates per circle.
-    // Since this takes more effort, gradually reduce circles per frame.
-    if (k < 500) k *= maxRadius/circle[2], m *= .998;
+      //Drawing a circle
+      context.fillStyle = "rgba(0, 0, 0, " + circle[2]/maxRadius + ")";
+      context.beginPath();
+      //context.arc(x-center, y-center, radius, startAngle, endAngle, counterclockwise)
+      //A circle would thus look like:
+      context.arc(circle[0] + maxRadius, circle[1] + maxRadius, circle[2], 0,  2 * Math.PI, true);
+      context.fill();
+      context.closePath();
+
+      // As we add more circles, generate more candidates per circle.
+      // Since this takes more effort, gradually reduce circles per frame.
+      if (k < 500) k *= maxRadius/circle[2], m *= .998;
   }
   
-  if (fibreArea < generatedArea) {
+  if (fibreArea <= generatedArea) {
     var error = ((generatedArea - fibreArea)*(100/fibreArea)).toFixed(3);
     var logMsg = document.createElement('h1');
     logMsg.innerHTML = "Error: " + error + "%";
     var bottom = document.createElement('h5');
     bottom.innerHTML = "greater than required volume fraction";
     alertify.log(logMsg.outerHTML + bottom.outerHTML);
+
+    document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5);
+
     return true;
   }
 
