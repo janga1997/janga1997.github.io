@@ -18,16 +18,12 @@
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/skeleton.css">
 
-  <!-- Favicon
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="icon" type="image/png" href="images/favicon.png">
-
 </head>
 <body>
   <h1 style="margin-left:35%">Abaqus Script Generator</h1>
 
   <div id="svgCS" style="width: 100%; text-align: center;">
-    
+
   </div>
 
   <!-- Primary Page Layout
@@ -37,15 +33,28 @@
     <hr>
     <div class="row">
       <form>
+        <h5 style="margin-left: 45%">Packing</h5>
+
+        <div class="row">
+          <div class="six columns">
+            <label for="packingType">Packing Type</label>
+            <select class="u-full-width" id="packingType">
+              <option value="random">Random</option>
+              <option value="cubic">Cubic</option>
+              <option value="hex">Hexagonal</option>
+            </select>
+          </div>
+        </div>
+
         <h5 style="margin-left: 40%">Matrix Dimensions</h5>
         <div class="row">
           <div class="four columns">
-            <label for="lengthMatrix">Length</label>
-            <input type="number" id="lengthMatrix" min="0">
-          </div>
-          <div class="four columns">
             <label for="breadthMatrix">Breadth</label>
             <input type="number" id="breadthMatrix" min="0">
+          </div>
+          <div class="four columns">
+            <label for="lengthMatrix">Length</label>
+            <input type="number" id="lengthMatrix" min="0">
           </div>
           <div class="four columns">
             <label for="depthMatrix">Depth/Height</label>
@@ -69,7 +78,7 @@
 
         <hr>
 
-        <button style="margin-left: 40%" class="button-primary" onclick="generateCS()">Generate Cross Section</button>
+        <button style="margin-left: 40%" class="button-primary" onclick="generate_random()" id="buttonCS">Generate Cross Section</button>
 
         <hr>
         <div class="row">
@@ -85,11 +94,6 @@
         </div>
         <hr>
         <div class="row">
-          <div class="six columns">
-            <label for="packingType">Packing Type</label>
-            <input type="text" id="packingType" placeholder="square" required>
-          </div>
-
           <div class="six columns">
             <label for="elementType">Element Type</label>
             <select class="u-full-width" id="elementType">
@@ -141,11 +145,11 @@
         <div class="row">
           <div class="six columns offset-by-three">
             <label for="fileName">File Name</label>
-            <input class="u-full-width" type="text" placeholder="script.py" id="fileName" required>
+            <input class="u-full-width" type="text" value="sample.json"  id="fileName" required>
           </div>
         </div>
 
-        <button style="margin-left: 40%" class="button-primary">Generate Python File</button>
+        <button style="margin-left: 40%" class="button-primary">Generate File</button>
 
       </form>
     </div>
@@ -154,6 +158,8 @@
   <script type="text/javascript" src='js/FileSaver.js'></script>
   <script type="text/javascript" src='js/mitchell.js'></script>
   <script type="text/javascript" src='js/d3.v3.min.js'></script>
+  <script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="js/alertify.js"></script>
   <script type="text/javascript" src='js/abaqus.js'></script>
 
 </body>
