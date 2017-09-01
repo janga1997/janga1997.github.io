@@ -1,3 +1,5 @@
+var generatedCentres = [];
+
 function generate_random() {
   var height = document.getElementById('lengthMatrix').value;
   var width = document.getElementById('breadthMatrix').value;
@@ -30,9 +32,11 @@ function generate_random() {
 
   var generatedArea = 0;
 
+  generatedCentres = [];
   d3.timer(function() {
     for (var i = 0; i < m && fibreArea > generatedArea; ++i) {
       var circle = newCircle(k);
+      generatedCentres.push(circle);
 
       console.log('Janga');
 
@@ -164,9 +168,11 @@ function generate_cubic() {
 
   var unit = Math.sqrt(width * height / numFibres);
 
+  generatedCentres = [];
   for (var i = 0; i < dimensions[1]; i++) {
     for (var j = 0; j < dimensions[0]; j++) {
       var center = [(i+0.5)*unit, (j+0.5)*unit];
+      generatedCentres.push([center[1], center[0], radius]);
 
       //Drawing a circle
       context.fillStyle = "black";
@@ -206,8 +212,35 @@ $("#packingType").change(function () {
   button.onclick = Function("generate_" + $("#packingType").val() + "()");
 });
 
-function getPyFile() {
-  var fileText = "This is just some placeholder text for now."
-  var file = new File(["Hello, world!"], "test_script.py", {type: "text/plain;charset=utf-8"});
+function getFile() {
+  var fileObject = {};
+
+  fileObject.packingType = $("#packingType").val();
+  fileObject.length = document.getElementById('lengthMatrix').value;
+  fileObject.breadth = document.getElementById('breadthMatrix').value;
+  fileObject.depth = document.getElementById('depthMatrix').value;
+  fileObject.numFibres = document.getElementById('numFibres').value;
+  fileObject.volumeFraction = document.getElementById('volumeFraction').value;
+
+  fileObject.centers = generatedCentres;
+
+  fileObject.fibreProperty = document.getElementById('fibreProperty').value;
+  fileObject.matrixProperty = document.getElementById('matrixProperty').value;
+  fileObject.elementType = document.getElementById('elementType').value;
+  fileObject.meshSeed = document.getElementById('meshSeed').value;
+  fileObject.loading = document.getElementById('loading').value;
+
+  fileObject.components = [];
+  fileObject.directions = [];
+
+  var comps = ['x', 'y', 'z'];
+
+  for(s of comps){
+    fileObject.components.push(Number(document.getElementById(s + 'Comp').checked));
+    fileObject.directions.push(Number(document.getElementById(s + 'Comp-both').checked))
+  }
+
+  fileObject = JSON.stringify(fileObject);
+  var file = new File([fileObject], document.getElementById('fileName').value);
   saveAs(file);
 }

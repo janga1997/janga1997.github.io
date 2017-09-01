@@ -99,8 +99,8 @@
           <div class="six columns">
             <label for="elementType">Element Type</label>
             <select class="u-full-width" id="elementType">
-              <option value="Option 1">Hex</option>
-              <option value="Option 2">Tetrahedron</option>
+              <option value="hex">Hex</option>
+              <option value="tet">Tetrahedron</option>
             </select>
           </div>
         </div>
@@ -115,8 +115,8 @@
           <div class="six columns">
             <label for="loading">Loading</label>
             <select class="u-full-width" id="loading">
-              <option value="Option 1">Loading</option>
-              <option value="Option 2">Displacement</option>
+              <option value="loading">Loading</option>
+              <option value="displacement">Displacement</option>
             </select>
           </div>
         </div>
@@ -151,7 +151,7 @@
           </div>
         </div>
 
-        <button style="margin-left: 40%" class="button-primary">Generate File</button>
+        <button style="margin-left: 40%" class="button-primary" onclick="getFile()">Generate File</button>
 
       </form>
     </div>
