@@ -36,7 +36,7 @@ function generate_random() {
   d3.timer(function() {
     for (var i = 0; i < m && fibreArea > generatedArea; ++i) {
       var circle = newCircle(k);
-      generatedCentres.push([circle[0] + maxRadius, circle[1] + maxRadius, circle[2]);
+      generatedCentres.push([circle[0] + maxRadius, circle[1] + maxRadius, circle[2]]);
 
       console.log('Janga');
 
