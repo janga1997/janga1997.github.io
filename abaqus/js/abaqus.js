@@ -9,7 +9,7 @@ function generate_random() {
 
   var maxRadius = Math.sqrt(volumeFraction * height * width/ (Math.PI * numFibres));
   var minRadius = maxRadius;
-  var newCircle = bestCircleGenerator(1.05*maxRadius, 0.05*maxRadius, width - 2*maxRadius , height - 2*maxRadius);
+  var newCircle = bestCircleGenerator(1.05*maxRadius, 0.05*maxRadius, width - 2.1*maxRadius , height - 2.1*maxRadius);
 
 
   var fibreArea = volumeFraction * (width)  * (height );
@@ -36,7 +36,7 @@ function generate_random() {
   d3.timer(function() {
     for (var i = 0; i < m && fibreArea > generatedArea; ++i) {
       var circle = newCircle(k);
-      generatedCentres.push([circle[0] + maxRadius, circle[1] + maxRadius, circle[2]]);
+      generatedCentres.push([circle[0] + 1.05*maxRadius, circle[1] + 1.05*maxRadius, circle[2]]);
 
       console.log('Janga');
 
@@ -52,7 +52,7 @@ function generate_random() {
       context.beginPath();
       //context.arc(x-center, y-center, radius, startAngle, endAngle, counterclockwise)
       //A circle would thus look like:
-      context.arc(circle[0] + maxRadius, circle[1] + maxRadius, circle[2], 0,  2 * Math.PI, true);
+      context.arc(circle[0] + 1.05*maxRadius, circle[1] + 1.05*maxRadius, circle[2], 0,  2 * Math.PI, true);
       context.fill();
       context.closePath();
 
