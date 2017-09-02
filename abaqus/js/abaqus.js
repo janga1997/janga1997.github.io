@@ -1,11 +1,28 @@
-var generatedCentres = [];
+var masterObject = new Vue({
+  el: "#masterAbaqus",
+  data: {
+    packingType: "random",
+    lengthMatrix: 100,
+    breadthMatrix: 100,
+    depthMatrix: 100,
+    generatedCenters: [],
+    volumeFraction: 0.3,
+    numFibres: 50,
+    fibreProperty: 'Steel',
+    matrixProperty: 'Concrete',
+    elementType: 'hex',
+    meshSeed: "",
+    loading: "loading",
+    fileName: "sample.json"
+  }
+});
 
 function generate_random() {
-  var height = document.getElementById('lengthMatrix').value;
-  var width = document.getElementById('breadthMatrix').value;
+  var height = masterObject.lengthMatrix;
+  var width = masterObject.breadthMatrix
 
-  var numFibres = document.getElementById('numFibres').value;
-  var volumeFraction = document.getElementById('volumeFraction').value;
+  var numFibres = masterObject.numFibres;
+  var volumeFraction = masterObject.volumeFraction;
 
   var maxRadius = Math.sqrt(volumeFraction * height * width/ (Math.PI * numFibres));
   var minRadius = maxRadius;
@@ -32,13 +49,12 @@ function generate_random() {
 
   var generatedArea = 0;
 
-  generatedCentres = [];
+  masterObject.generatedCenters = [];
   d3.timer(function() {
     for (var i = 0; i < m && fibreArea > generatedArea; ++i) {
       var circle = newCircle(k);
-      generatedCentres.push([circle[0] + 1.05*maxRadius, circle[1] + 1.05*maxRadius, circle[2]]);
 
-      console.log('Janga');
+      masterObject.generatedCentres.push([circle[0] + 1.05*maxRadius, circle[1] + 1.05*maxRadius, circle[2]]);
 
       generatedArea += Math.PI * circle[2] * circle[2];
 
@@ -127,10 +143,10 @@ function alertAbaqus() {
 
 function generate_cubic() {
   // body...
-  var width = document.getElementById('breadthMatrix').value;
+  var width = masterObject.breadthMatrix;
 
-  var numFibres = document.getElementById('numFibres').value;
-  var volumeFraction = document.getElementById('volumeFraction').value;
+  var numFibres = masterObject.numFibres;
+  var volumeFraction = masterObject.volumeFraction;
 
   var factors = getFactors(numFibres);
 
@@ -168,17 +184,16 @@ function generate_cubic() {
 
   var unit = Math.sqrt(width * height / numFibres);
 
-  generatedCentres = [];
+  masterObject.generatedCenters = [];
   for (var i = 0; i < dimensions[1]; i++) {
     for (var j = 0; j < dimensions[0]; j++) {
       var center = [(i+0.5)*unit, (j+0.5)*unit];
-      generatedCentres.push([center[1], center[0], radius]);
+      masterObject.generatedCenters.push([center[1], center[0], radius]);
 
       //Drawing a circle
       context.fillStyle = "black";
       context.beginPath();
       //A circle would thus look like:
-      console.log(center);
       context.arc(center[1], center[0], radius, 0, 2 * Math.PI, true);
       context.fill();
       context.closePath();
@@ -206,29 +221,10 @@ function getFactors(num) {
   return factors;
 }
 
-$("#packingType").change(function () {
-  console.log('Janga');
-  var button = document.getElementById('buttonCS');
-  button.onclick = Function("generate_" + $("#packingType").val() + "()");
-});
-
 function getFile() {
   var fileObject = {};
 
-  fileObject.packingType = $("#packingType").val();
-  fileObject.length = document.getElementById('lengthMatrix').value;
-  fileObject.breadth = document.getElementById('breadthMatrix').value;
-  fileObject.depth = document.getElementById('depthMatrix').value;
-  fileObject.numFibres = document.getElementById('numFibres').value;
-  fileObject.volumeFraction = document.getElementById('volumeFraction').value;
-
-  fileObject.centers = generatedCentres;
-
-  fileObject.fibreProperty = document.getElementById('fibreProperty').value;
-  fileObject.matrixProperty = document.getElementById('matrixProperty').value;
-  fileObject.elementType = document.getElementById('elementType').value;
-  fileObject.meshSeed = document.getElementById('meshSeed').value;
-  fileObject.loading = document.getElementById('loading').value;
+  fileObject = masterObject.$data;
 
   fileObject.components = [];
   fileObject.directions = [];
@@ -241,6 +237,6 @@ function getFile() {
   }
 
   fileObject = JSON.stringify(fileObject);
-  var file = new File([fileObject], document.getElementById('fileName').value);
+  var file = new File([fileObject], masterObject.fileName);
   saveAs(file);
 }
