@@ -54,7 +54,7 @@ function generate_random() {
     for (var i = 0; i < m && fibreArea > generatedArea; ++i) {
       var circle = newCircle(k);
 
-      masterObject.generatedCentres.push([circle[0] + 1.05*maxRadius, circle[1] + 1.05*maxRadius, circle[2]]);
+      masterObject.generatedCenters.push([circle[0] + 1.05*maxRadius, circle[1] + 1.05*maxRadius, circle[2]]);
 
       generatedArea += Math.PI * circle[2] * circle[2];
 
