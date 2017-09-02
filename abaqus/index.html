@@ -81,7 +81,7 @@
 
         <hr>
 
-        <button style="margin-left: 40%" class="button-primary"  id="buttonCS" :onclick="'generate_' + packingType + '()'">Generate Cross Section</button>
+        <button type="button" style="margin-left: 40%" class="button-primary"  id="buttonCS" :onclick="'generate_' + packingType + '()'">Generate Cross Section</button>
 
         <hr>
         <div class="row">
@@ -110,7 +110,7 @@
 
           <div class="six columns">
             <label for="meshSeed">Mesh Seed Size</label>
-            <input type="number" min="0" id="meshSeed" placeholder="0" v-model='meshSeed' required>
+            <input type="number" min="0" id="meshSeed" step="any" :max='padding' placeholder="0" v-model='meshSeed' required>
           </div>
 
           <div class="six columns">
@@ -152,7 +152,7 @@
           </div>
         </div>
 
-        <button style="margin-left: 40%" class="button-primary" onclick="getFile()">Generate File</button>
+        <button type="button" style="margin-left: 40%" class="button-primary" onclick="getFile()">Generate File</button>
 
       </form>
     </div>

@@ -12,6 +12,7 @@ var masterObject = new Vue({
     matrixProperty: 'Concrete',
     elementType: 'hex',
     meshSeed: "",
+    padding: 0,
     loading: "loading",
     fileName: "sample.json"
   }
@@ -28,6 +29,7 @@ function generate_random() {
   var minRadius = maxRadius;
   var newCircle = bestCircleGenerator(1.05*maxRadius, 0.05*maxRadius, width - 2.1*maxRadius , height - 2.1*maxRadius);
 
+  masterObject.padding = 0.05*maxRadius;
 
   var fibreArea = volumeFraction * (width)  * (height );
 
