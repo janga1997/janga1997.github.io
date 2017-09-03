@@ -15,6 +15,7 @@ var masterObject = new Vue({
     meshSeed: "",
     padding: 0,
     loading: "loading",
+    uploadFile: false,
     fileName: "sample.json",
   },
   methods: {
