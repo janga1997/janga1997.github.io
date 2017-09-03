@@ -46,6 +46,10 @@
               <option value="hex">Hexagonal</option>
             </select>
           </div>
+          <div class="six columns">
+            <label for="csvData">CSV File</label>
+            <input type="file" id="csvData" size="120" v-on:change="parseCSV">
+          </div>
         </div>
 
         <h5 style="margin-left: 40%">Matrix Dimensions</h5>
@@ -163,6 +167,7 @@
   <script type="text/javascript" src='js/d3.v3.min.js'></script>
   <script type="text/javascript" src='js/vue.min.js'></script>
   <script type="text/javascript" src="js/alertify.js"></script>
+  <script type="text/javascript" src='js/papaparse.min.js'></script>
   <script type="text/javascript" src='js/abaqus.js'></script>
 
 </body>

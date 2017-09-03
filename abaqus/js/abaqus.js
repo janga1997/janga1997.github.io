@@ -14,7 +14,13 @@ var masterObject = new Vue({
     meshSeed: "",
     padding: 0,
     loading: "loading",
-    fileName: "sample.json"
+    fileName: "sample.json",
+  },
+  methods: {
+    parseCSV : function (event) {
+      var data = parse_csv(event.target.files[0])
+      console.log(data);
+    }
   }
 });
 
@@ -221,6 +227,19 @@ function getFactors(num) {
   }
 
   return factors;
+}
+
+function parse_csv(file) {
+  var data = [];
+
+  Papa.parse(file, {
+      complete: function(results) {
+          data = results.data; // results appear in dev console
+          console.log(data);
+      }
+  });
+
+  return data;
 }
 
 function getFile() {
