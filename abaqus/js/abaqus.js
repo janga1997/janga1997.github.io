@@ -16,12 +16,15 @@ var masterObject = new Vue({
     padding: 0,
     loading: "loading",
     uploadFile: false,
-    fileName: "sample.json",
+    fileName: "sample.json"
   },
   methods: {
     parseCSV : function (event) {
       parse_csv(event.target.files[0]);
 
+    },
+    clearCSV : function (event) {
+      event.target.value = "";
     }
   }
 });

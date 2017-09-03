@@ -52,7 +52,7 @@
           </div>
           <div class="six columns" v-if="uploadFile">
             <label for="csvData">CSV File</label>
-            <input type="file" id="csvData" size="120" v-on:change="parseCSV">
+            <input type="file" id="csvData" size="120" v-on:click="clearCSV" v-on:change="parseCSV">
           </div>
         </div>
 
