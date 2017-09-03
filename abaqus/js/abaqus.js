@@ -6,6 +6,7 @@ var masterObject = new Vue({
     breadthMatrix: 100,
     depthMatrix: 100,
     generatedCenters: [],
+    csvCircles: [],
     volumeFraction: 0.3,
     numFibres: 50,
     fibreProperty: 'Steel',
@@ -18,8 +19,8 @@ var masterObject = new Vue({
   },
   methods: {
     parseCSV : function (event) {
-      var data = parse_csv(event.target.files[0])
-      console.log(data);
+      parse_csv(event.target.files[0]);
+
     }
   }
 });
@@ -230,16 +231,20 @@ function getFactors(num) {
 }
 
 function parse_csv(file) {
-  var data = [];
 
   Papa.parse(file, {
       complete: function(results) {
-          data = results.data; // results appear in dev console
-          console.log(data);
+          masterObject.csvCircles = results.data; // results appear in dev console
+
+          masterObject.csvCircles = masterObject.csvCircles.filter(function(arr){ return arr.length > 0 });
+
+          masterObject.breadthMatrix = Number(masterObject.csvCircles[0][0]);
+          masterObject.lengthMatrix = Number(masterObject.csvCircles[0][1]);
+          masterObject.depthMatrix = Number(masterObject.csvCircles[0][2]);
+          masterObject.numFibres = masterObject.csvCircles.length - 1;
       }
   });
 
-  return data;
 }
 
 function getFile() {
