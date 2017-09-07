@@ -34,7 +34,7 @@
   <div class="container" id="masterAbaqus">
     <hr>
     <div class="row">
-      <form>
+      <form onsubmit="getFile(); return false">
 
       <div class="row" style="text-align: center;">
         <label for="uploadFile" style="font-size: 1.5em;"> Upload Data </label>
@@ -90,8 +90,8 @@
 
         <hr>
 
-        <button type="button" style="margin-left: 40%" class="button-primary"  id="buttonCS" :onclick="'generate_' + packingType + '()'">Generate Cross Section</button>
-
+        <button type="button" style="margin-left: 40%" class="button-primary" v-if="!uploadFile" id="buttonCS" :onclick="'generate_' + packingType + '()'">Generate Cross Section</button>
+        <button type="button" style="margin-left: 40%" class="button-primary" v-if="uploadFile" id="buttonCS" :onclick="'generate_upload()'">Generate Cross Section</button>
         <hr>
         <div class="row">
           <div class="six columns">
@@ -161,7 +161,7 @@
           </div>
         </div>
 
-        <button type="button" style="margin-left: 40%" class="button-primary" onclick="getFile()">Generate File</button>
+        <button type="submit" style="margin-left: 40%" class="button-primary" >Generate File</button>
 
       </form>
     </div>
@@ -172,6 +172,7 @@
   <script type="text/javascript" src='js/d3.v3.min.js'></script>
   <script type="text/javascript" src='js/vue.min.js'></script>
   <script type="text/javascript" src="js/alertify.js"></script>
+  <script type="text/javascript" src='js/toxiclibs.min.js'></script>
   <script type="text/javascript" src='js/papaparse.min.js'></script>
   <script type="text/javascript" src='js/abaqus.js'></script>
 

@@ -147,15 +147,7 @@ function bestCircleGenerator(maxRadius, padding, width, height) {
 
 }
 
-function alertAbaqus() {
-  // body...
-  var msg = "<h3>Error : 0.1 %</h3>" +
-  "<p>greater than the required fibre area</p>";
-  alertify.log(msg);
-}
-
 function generate_cubic() {
-  // body...
   var width = masterObject.breadthMatrix;
 
   var numFibres = masterObject.numFibres;
@@ -216,7 +208,110 @@ function generate_cubic() {
 }
 
 function generate_hex() {
-  console.log('Hexagonal being generated');
+  var width = masterObject.breadthMatrix;
+
+  var numFibres = masterObject.numFibres;
+  var volumeFraction = masterObject.volumeFraction,
+      maxFraction = Math.PI/(2*Math.sqrt(3));
+
+  var factors = getFactors(numFibres);
+
+  factors = factors.sort(function(a, b) {
+    return a - b;
+  });
+
+  var ratio, dimensions;
+
+  if (factors.length % 2 == 1) {
+    var index = (factors.length - 1)/2;
+    dimensions = [factors[index], factors[index]];
+  }
+
+  else {
+    var index = factors.length/2;
+    dimensions = [factors[index], factors[index - 1]];
+  }
+
+  ratio = ((2 + (dimensions[1]-1)*Math.sqrt(3))/(2*dimensions[0]))
+
+  var height = ratio * width;
+  var maxRadius = width/(2*dimensions[0]);
+  var radius = Math.sqrt(volumeFraction/maxFraction) * maxRadius;
+
+  document.getElementById('svgCS').innerHTML = "";
+
+  var canvas = d3.select("#svgCS").append("canvas")
+    .attr("width", width)
+    .attr("height", height);
+
+  var context = canvas.node().getContext("2d");
+
+  context.fillStyle = "grey";
+  context.fillRect(0, 0, width, height);
+
+  var unit = Math.sqrt(width * height / numFibres);
+
+  masterObject.generatedCenters = [];
+  for (var i = 0; i < dimensions[1]; i++) {
+    for (var j = 0; j < dimensions[0] + i%2; j++) {
+      var center = [maxRadius*((i+1)%2) + j*2*maxRadius, maxRadius + i*maxRadius*Math.sqrt(3)];
+      masterObject.generatedCenters.push([center[1], center[0], maxRadius]);
+
+      //Drawing a circle
+      context.fillStyle = "black";
+      context.beginPath();
+      //A circle would thus look like:
+      context.arc(center[0], center[1], radius, 0, 2 * Math.PI, true);
+      context.fill();
+      context.closePath();
+    }
+  }
+}
+
+function generate_upload() {
+
+var Vec2D = toxi.geom.Vec2D,
+    Circle = toxi.geom.Circle;
+
+  var height = masterObject.lengthMatrix;
+  var width = masterObject.breadthMatrix
+
+  document.getElementById('svgCS').innerHTML = "";
+
+  var canvas = d3.select("#svgCS").append("canvas")
+    .attr("width", width)
+    .attr("height", height);
+
+  var context = canvas.node().getContext("2d");
+
+  context.fillStyle = "grey";
+  context.fillRect(0, 0, width, height);
+
+  masterObject.generatedCenters = [];
+
+  var p1, p2, p3, circle, row;
+
+  for (var i = 0; i < masterObject.csvCircles.length; i++) {
+    row = masterObject.csvCircles[i];
+    p1 = new Vec2D(row[0], row[1]);
+    p2 = new Vec2D(row[2], row[3]);
+    p3 = new Vec2D(row[4], row[5]);
+    circle = Circle.from3Points(p1, p2, p3);
+
+    //Drawing a circle
+    context.fillStyle = "black";
+    context.beginPath();
+    context.arc(circle.x, circle.y, circle.getRadius(), 0, 2 * Math.PI, true);
+    context.fill();
+    context.closePath();    
+  }
+}
+
+function alertAbaqus() {
+  // body...
+  var msg = "<h3>Error : 0.1 %</h3>" +
+  "<p>greater than the required fibre area</p>";
+  alertify.log(msg);
 }
 
 function getFactors(num) {
@@ -237,15 +332,17 @@ function getFactors(num) {
 function parse_csv(file) {
 
   Papa.parse(file, {
+      dynamicTyping: true,
       complete: function(results) {
           masterObject.csvCircles = results.data; // results appear in dev console
 
-          masterObject.csvCircles = masterObject.csvCircles.filter(function(arr){ return arr.length > 0 });
+          masterObject.csvCircles = masterObject.csvCircles.filter(function(arr){ return arr.length > 1 });
 
           masterObject.breadthMatrix = Number(masterObject.csvCircles[0][0]);
           masterObject.lengthMatrix = Number(masterObject.csvCircles[0][1]);
           masterObject.depthMatrix = Number(masterObject.csvCircles[0][2]);
-          masterObject.numFibres = masterObject.csvCircles.length - 1;
+          masterObject.csvCircles = masterObject.csvCircles.slice(1);
+          masterObject.numFibres = masterObject.csvCircles.length;
       }
   });
 
