@@ -12,12 +12,12 @@ var masterObject = new Vue({
     numFibres: 50,
     fibreProperty: 'Steel',
     matrixProperty: 'Concrete',
-    elementType: 'hex',
-    meshSeed: "",
+    // elementType: 'hex',
+    // meshSeed: "",
     padding: 0,
-    loading: "loading",
+    // loading: "loading",
     uploadFile: false,
-    fileName: "sample.json"
+    fileName: "sample.py"
   },
   methods: {
     parseCSV : function (event) {
@@ -77,7 +77,7 @@ function generate_random() {
         }
       }
 
-      masterObject.generatedCenters.push([circle[0] + 1.05*maxRadius, circle[1] + 1.05*maxRadius, circle[2]]);
+      masterObject.generatedCenters.push([circle[0], circle[1], circle[2]]);
 
       tempArea = removeArea(circle, width, height);
       console.log(tempArea/(Math.PI * circle[2] * circle[2]) + ', ' + tempArea);
@@ -207,7 +207,7 @@ function removeArea(circle, width, height) {
     }
   }
 
-  else if ( x > radius && x < width - radius && y > radius && y < width - radius ) {
+  else if ( x > radius && x < width - radius && y > radius && y < height - radius ) {
     area = Math.PI * radius * radius;
     return area;
   }
@@ -451,15 +451,15 @@ function getFile() {
 
   fileObject = masterObject.$data;
 
-  fileObject.components = [];
-  fileObject.directions = [];
+  // fileObject.components = [];
+  // fileObject.directions = [];
 
-  var comps = ['x', 'y', 'z'];
+  // var comps = ['x', 'y', 'z'];
 
-  for(s of comps){
-    fileObject.components.push(Number(document.getElementById(s + 'Comp').checked));
-    fileObject.directions.push(Number(document.getElementById(s + 'Comp-both').checked))
-  }
+  // for(s of comps){
+  //   fileObject.components.push(Number(document.getElementById(s + 'Comp').checked));
+  //   fileObject.directions.push(Number(document.getElementById(s + 'Comp-both').checked))
+  // }
 
   fileObject = JSON.stringify(fileObject);
   var file = new File([fileObject], masterObject.fileName);
