@@ -50,6 +50,10 @@
               <option value="hex">Hexagonal</option>
             </select>
           </div>
+          <div class="six columns" v-if="packingType == 'random'">
+            <label for="smallFib">Smaller Fibres</label>
+            <input type="checkbox" id="smallFib" v-model='smallFib' style="zoom:2">
+          </div>
           <div class="six columns" v-if="uploadFile">
             <label for="csvData">CSV File</label>
             <input type="file" id="csvData" size="120" v-on:click="clearCSV" v-on:change="parseCSV">
