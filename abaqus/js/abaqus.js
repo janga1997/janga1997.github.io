@@ -460,7 +460,9 @@ function getFile() {
   //   fileObject.directions.push(Number(document.getElementById(s + 'Comp-both').checked))
   // }
 
-  fileObject = JSON.stringify(fileObject);
+  fileObject = 'data = ' JSON.stringify(fileObject);
+  fileObject = pythonFile + fileObject;
+  fileObject += 'automateMicro(data)';
   var file = new File([fileObject], masterObject.fileName);
   saveAs(file);
 }
