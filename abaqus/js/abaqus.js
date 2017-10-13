@@ -14,6 +14,7 @@ var masterObject = new Vue({
     fibrePR: 0.5,
     matrixYM: 800000,
     matrixPR: 0.8,
+    meshSeed: 2,
     padding: 0,
     uploadFile: false,
     fileName: "sample.py"
@@ -286,6 +287,8 @@ function generate_cubic() {
 
   var unit = Math.sqrt(width * height / numFibres);
 
+  masterObject.padding = (unit/2) - radius;
+
   masterObject.generatedCenters = [];
   for (var i = 0; i < dimensions[1]; i++) {
     for (var j = 0; j < dimensions[0]; j++) {
@@ -334,6 +337,8 @@ function generate_hex() {
   var height = masterObject.lengthMatrix = ratio * width;
   var maxRadius = width/(2*dimensions[0]);
   var radius = Math.sqrt(volumeFraction/maxFraction) * maxRadius;
+
+  masterObject.padding = maxRadius - radius;
 
   document.getElementById('svgCS').innerHTML = "";
 

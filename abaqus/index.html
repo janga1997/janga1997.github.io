@@ -64,15 +64,15 @@
           <div class="row">
             <div class="four columns">
               <label for="breadthMatrix">Breadth</label>
-              <input type="number" id="breadthMatrix" min="0" v-model='breadthMatrix'>
+              <input type="number" id="breadthMatrix" min="0" step="any" v-model='breadthMatrix'>
             </div>
             <div class="four columns" v-if="packingType == 'random' || uploadFile">
               <label for="lengthMatrix">Length</label>
-              <input type="number" id="lengthMatrix" min="0" v-model='lengthMatrix'>
+              <input type="number" id="lengthMatrix" min="0" step="any" v-model='lengthMatrix'>
             </div>
             <div class="four columns">
               <label for="depthMatrix">Depth/Height</label>
-              <input type="number" id="depthMatrix" min="0" v-model='depthMatrix'>
+              <input type="number" id="depthMatrix" min="0" step="any" v-model='depthMatrix'>
             </div>
           </div>
           <hr>
@@ -81,7 +81,7 @@
 
             <div class="six columns">
               <label for="volumeFraction">Volume Fraction</label>
-              <input class="u-full-width" type="number" min="0" max="1" step="0.001" v-model='volumeFraction'
+              <input class="u-full-width" type="number" min="0" max="1" step="any" v-model='volumeFraction'
               placeholder="0.5" id="volumeFraction" required :disabled="uploadFile">
             </div>
 
@@ -112,7 +112,7 @@
             </div>
             <div class="three columns">
               <label for="matrixPR">Poisson's Ratio</label>
-              <input type="number" min="0" max="1" step="0.001" id="matrixPR" v-model='matrixPR' required>
+              <input type="number" min="0" max="1" step="any" id="matrixPR" v-model='matrixPR' required>
             </div>
 
             <div class="three columns">
@@ -121,11 +121,10 @@
             </div>
             <div class="three columns">
               <label for="fibrePR">Poisson's Ratio</label>
-              <input type="number" min="0" max="1" step="0.001" id="fibrePR" v-model='fibrePR' required>
+              <input type="number" min="0" max="1" step="any" id="fibrePR" v-model='fibrePR' required>
             </div>
           </div>
-  <!--       <hr>
-        <div class="row">
+<!--         <div class="row">
           <div class="six columns">
             <label for="elementType">Element Type</label>
             <select class="u-full-width" id="elementType" v-model='elementType'>
@@ -134,14 +133,18 @@
             </select>
           </div>
         </div>
+ -->
+
         <hr>
         <div class="row">
 
-          <div class="six columns">
+          <div class="twelve columns">
             <label for="meshSeed">Mesh Seed Size</label>
-            <input type="number" min="0" id="meshSeed" step="any" :max='padding' placeholder="0" v-model='meshSeed' required>
+            <input type="number" min="0" id="meshSeed" step="any" :max='10*padding' placeholder="0" v-model='meshSeed' required>
           </div>
-
+          </div>
+          <hr>
+<!-- 
           <div class="six columns">
             <label for="loading">Loading</label>
             <select class="u-full-width" id="loading" v-model='loading'>
@@ -151,6 +154,8 @@
           </div>
         </div>
         <hr>
+
+
         <h5 class="six columns offset-by-four u-full-width">Direction of Loading</h5>
 
         <div class="row">
@@ -172,8 +177,8 @@
             <label for="zComp-both">Two Way</label>
             <input type="checkbox" id="zComp-both">
           </div>
-        </div>
-      -->      <hr>
+        </div> -->
+           
       <div class="row">
         <div class="six columns offset-by-three">
           <label for="fileName">File Name</label>
