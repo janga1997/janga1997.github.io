@@ -270,7 +270,7 @@ function generate_cubic() {
     ratio = dimensions[1]/dimensions[0];
   }
 
-  var height = ratio * width;
+  var height = masterObject.lengthMatrix = ratio * width;
   var radius = Math.sqrt(volumeFraction * height * width/ (Math.PI * numFibres));
 
   document.getElementById('svgCS').innerHTML = "";
@@ -331,7 +331,7 @@ function generate_hex() {
 
   ratio = ((2 + (dimensions[1]-1)*Math.sqrt(3))/(2*dimensions[0]))
 
-  var height = ratio * width;
+  var height = masterObject.lengthMatrix = ratio * width;
   var maxRadius = width/(2*dimensions[0]);
   var radius = Math.sqrt(volumeFraction/maxFraction) * maxRadius;
 
@@ -352,7 +352,7 @@ function generate_hex() {
   for (var i = 0; i < dimensions[1]; i++) {
     for (var j = 0; j < dimensions[0] + i%2; j++) {
       var center = [maxRadius*((i+1)%2) + j*2*maxRadius, maxRadius + i*maxRadius*Math.sqrt(3)];
-      masterObject.generatedCenters.push([center[1], center[0], maxRadius]);
+      masterObject.generatedCenters.push([center[0], center[1], radius]);
 
       //Drawing a circle
       context.fillStyle = "black";
