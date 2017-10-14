@@ -435,8 +435,9 @@ function add_scene() {
   controls.rotateSpeed = 2.0;
 
   var animate = function () {
-   requestAnimationFrame( animate );
-
+  setTimeout(function() {
+    requestAnimationFrame(animate);
+  }, 1000/20);
    renderer.render(scene, camera);
    controls.update();
 
