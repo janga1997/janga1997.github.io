@@ -33,7 +33,8 @@ var masterObject = new Vue({
 function generate_random() {
   var completed = false;
   var height = masterObject.lengthMatrix;
-  var width = masterObject.breadthMatrix
+  var width = masterObject.breadthMatrix;
+  var vertical = masterObject.depthMatrix;
 
   var numFibres = masterObject.numFibres;
   var volumeFraction = masterObject.volumeFraction;
@@ -49,16 +50,8 @@ function generate_random() {
   var k = 1000, // initial number of candidates to consider per circle
   m = 10;
 
-  document.getElementById('svgCS').innerHTML = "";
-
-  var canvas = d3.select("#svgCS").append("canvas")
-  .attr("width", width)
-  .attr("height", height);
-
-  var context = canvas.node().getContext("2d");
-
-  context.fillStyle = "grey";
-  context.fillRect(0, 0, width, height);
+  var scene = add_scene();
+  add_cube(scene);
 
   var count = 0;
 
@@ -88,14 +81,7 @@ function generate_random() {
 
       minRadius = Math.min(minRadius, circle[2]);
 
-      //Drawing a circle
-      context.fillStyle = "rgba(0, 0, 0, " + circle[2]/maxRadius + ")";
-      context.beginPath();
-      //context.arc(x-center, y-center, radius, startAngle, endAngle, counterclockwise)
-      //A circle would thus look like:
-      context.arc(circle[0], circle[1], circle[2], 0,  2 * Math.PI, true);
-      context.fill();
-      context.closePath();
+      add_fibre(scene, circle[0], circle[1], circle[2]);
 
       // As we add more circles, generate more candidates per circle.
       // Since this takes more effort, gradually reduce circles per frame.
@@ -111,7 +97,7 @@ function generate_random() {
       alertify.log(logMsg.outerHTML + bottom.outerHTML);
 
       document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5)
-                                                       + "\nMaximum Radius: " + maxRadius.toFixed(5);
+      + "\nMaximum Radius: " + maxRadius.toFixed(5);
 
       return true;
     }
@@ -125,7 +111,7 @@ function generate_random() {
       alertify.log(logMsg.outerHTML + bottom.outerHTML);
 
       document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5)
-                                                       + "\nMaximum Radius: " + maxRadius.toFixed(5);
+      + "\nMaximum Radius: " + maxRadius.toFixed(5);
 
       return true;
     }
@@ -274,16 +260,8 @@ function generate_cubic() {
   var height = masterObject.lengthMatrix = ratio * width;
   var radius = Math.sqrt(volumeFraction * height * width/ (Math.PI * numFibres));
 
-  document.getElementById('svgCS').innerHTML = "";
-
-  var canvas = d3.select("#svgCS").append("canvas")
-  .attr("width", width)
-  .attr("height", height);
-
-  var context = canvas.node().getContext("2d");
-
-  context.fillStyle = "grey";
-  context.fillRect(0, 0, width, height);
+  var scene = add_scene();
+  add_cube(scene);
 
   var unit = Math.sqrt(width * height / numFibres);
 
@@ -295,13 +273,7 @@ function generate_cubic() {
       var center = [(i+0.5)*unit, (j+0.5)*unit];
       masterObject.generatedCenters.push([center[1], center[0], radius]);
 
-      //Drawing a circle
-      context.fillStyle = "black";
-      context.beginPath();
-      //A circle would thus look like:
-      context.arc(center[1], center[0], radius, 0, 2 * Math.PI, true);
-      context.fill();
-      context.closePath();
+      add_fibre(scene, center[1], center[0], radius);
     }
   }
 
@@ -340,16 +312,8 @@ function generate_hex() {
 
   masterObject.padding = maxRadius - radius;
 
-  document.getElementById('svgCS').innerHTML = "";
-
-  var canvas = d3.select("#svgCS").append("canvas")
-  .attr("width", width)
-  .attr("height", height);
-
-  var context = canvas.node().getContext("2d");
-
-  context.fillStyle = "grey";
-  context.fillRect(0, 0, width, height);
+  var scene = add_scene();
+  add_cube(scene);
 
   var unit = Math.sqrt(width * height / numFibres);
 
@@ -359,13 +323,7 @@ function generate_hex() {
       var center = [maxRadius*((i+1)%2) + j*2*maxRadius, maxRadius + i*maxRadius*Math.sqrt(3)];
       masterObject.generatedCenters.push([center[0], center[1], radius]);
 
-      //Drawing a circle
-      context.fillStyle = "black";
-      context.beginPath();
-      //A circle would thus look like:
-      context.arc(center[0], center[1], radius, 0, 2 * Math.PI, true);
-      context.fill();
-      context.closePath();
+      add_fibre(scene, center[0], center[1], radius);
     }
   }
 }
@@ -448,6 +406,86 @@ function parse_csv(file) {
         }
       });
 
+}
+
+function add_scene() {
+  var length = masterObject.lengthMatrix,
+  breadth = masterObject.breadthMatrix,
+  depth = masterObject.depthMatrix;
+
+  document.getElementById('svgCS').innerHTML = "";
+
+  var container = document.getElementById( 'svgCS' );
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.6, 5000);
+
+  var cameraPos = Math.max(length, breadth, depth);
+  cameraPos = 1.5*cameraPos;
+  camera.position.set(cameraPos, cameraPos, cameraPos); // all components equal
+  camera.lookAt( breadth/2, length/2, depth/2); // or the origin
+
+  var renderer = new THREE.WebGLRenderer();
+  renderer.setSize( window.innerWidth/1.5, window.innerHeight/1.5 );
+  container.appendChild( renderer.domElement );
+
+  var controls = new THREE.TrackballControls( camera , renderer.domElement);
+  controls.target.set( breadth/2, length/2, depth/2 );
+
+  controls.rotateSpeed = 2.0;
+
+  var animate = function () {
+   requestAnimationFrame( animate );
+
+   renderer.render(scene, camera);
+   controls.update();
+
+ };
+
+ animate();
+
+ return scene;
+}
+
+function add_cube(scene) {
+
+  var length = masterObject.lengthMatrix,
+  breadth = masterObject.breadthMatrix,
+  depth = masterObject.depthMatrix;
+
+  var axisHelper = new THREE.AxisHelper( 1.5*Math.max(length, breadth, depth) );
+  scene.add( axisHelper );
+
+  var geometry = new THREE.BoxGeometry( breadth, length, depth );
+  var material = new THREE.MeshBasicMaterial( { color: 0x2F4F4F, opacity: 0.95, transparent: true} );
+  var edges = new THREE.EdgesGeometry( geometry );
+  var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
+  scene.add( line );
+  var cube = new THREE.Mesh( geometry, material );
+  scene.add(cube);
+
+  line.position.set(breadth/2, length/2, depth/2);  
+  cube.position.set(breadth/2, length/2, depth/2);
+}
+
+function add_fibre(scene, x, y, radius) {
+
+  var depth = Number(masterObject.depthMatrix);
+
+  console.log(depth + 1);
+  geometry = new THREE.CylinderGeometry( radius, radius, 1.01*depth , 10);
+  material = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0} );
+  var small = new THREE.Mesh( geometry, material );
+  var edges = new THREE.EdgesGeometry( geometry );
+  var line1 = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0 } ) );
+  scene.add( line1 );
+  scene.add( small );
+
+  small.position.set(x, y, depth/2);
+  line1.position.set(x, y, depth/2);
+
+  small.rotation.x = 0.5*Math.PI;
+  line1.rotation.x = 0.5*Math.PI;
 }
 
 function getFile() {
