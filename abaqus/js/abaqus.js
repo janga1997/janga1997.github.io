@@ -1,3 +1,7 @@
+var timer;
+var animationId;
+var d3Timer;
+
 var masterObject = new Vue({
   el: "#masterAbaqus",
   data: {
@@ -58,13 +62,18 @@ function generate_random() {
   var generatedArea = 0;
   var tempArea = 0;
   masterObject.generatedCenters = [];
-  d3.timer(function() {
+
+  if (d3Timer) {
+    d3Timer.stop();
+  }
+
+  d3Timer = d3.timer(function() {
     for (var i = 0; i < m && fibreArea > generatedArea; ++i) {
       var circle = newCircle(k);
 
       if (!masterObject.smallFib) {
         if (circle[2] < maxRadius) {
-          console.log('Smaller fibres eliminated');
+          // console.log('Smaller fibres eliminated');
           completed = true;
           continue;
         }
@@ -73,9 +82,9 @@ function generate_random() {
       masterObject.generatedCenters.push([circle[0], circle[1], circle[2]]);
 
       tempArea = removeArea(circle, width, height);
-      console.log(tempArea/(Math.PI * circle[2] * circle[2]) + ', ' + tempArea);
-      console.log(circle);
-      console.log('----------------------------');
+      // console.log(tempArea/(Math.PI * circle[2] * circle[2]) + ', ' + tempArea);
+      // console.log(circle);
+      // console.log('----------------------------');
       generatedArea += tempArea;
       count++;
 
@@ -99,7 +108,7 @@ function generate_random() {
       document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5)
       + "\nMaximum Radius: " + maxRadius.toFixed(5);
 
-      return true;
+      d3Timer.stop();
     }
 
     if (fibreArea <= generatedArea) {
@@ -113,13 +122,13 @@ function generate_random() {
       document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5)
       + "\nMaximum Radius: " + maxRadius.toFixed(5);
 
-      return true;
+      d3Timer.stop();
     }
 
   });
 
   function bestCircleGenerator(maxRadius, padding, width, height) {
-    var quadtree = d3.geom.quadtree().extent([[0, 0], [width, height]])([]),
+    var quadtree = d3.quadtree().extent([[0, 0], [width, height]]),
     searchRadius = maxRadius * 2,
     maxRadius2 = maxRadius * maxRadius;
 
@@ -136,7 +145,7 @@ function generate_random() {
         minDistance = maxRadius; // minimum distance for this candidate
 
         quadtree.visit(function(quad, x1, y1, x2, y2) {
-          if (p = quad.point) {
+          if (p = quad.data) {
             var p,
             dx = x - p[0],
             dy = y - p[1],
@@ -434,16 +443,27 @@ function add_scene() {
 
   controls.rotateSpeed = 2.0;
 
+
   var animate = function () {
-  setTimeout(function() {
-    requestAnimationFrame(animate);
+
+  timer = setTimeout(function() {
+    animationId = requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+    controls.update();
   }, 1000/20);
-   renderer.render(scene, camera);
-   controls.update();
 
  };
 
- animate();
+  if (!timer) {
+   animate();
+   console.log(timer);
+   console.log(animationId);
+  }
+  else {
+    cancelAnimationFrame(animationId);
+    clearTimeout(timer);
+    animate();
+  }
 
  return scene;
 }
@@ -473,7 +493,7 @@ function add_fibre(scene, x, y, radius) {
 
   var depth = Number(masterObject.depthMatrix);
 
-  console.log(depth + 1);
+  // console.log(depth + 1);
   geometry = new THREE.CylinderGeometry( radius, radius, 1.01*depth , 10);
   material = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0} );
   var small = new THREE.Mesh( geometry, material );
