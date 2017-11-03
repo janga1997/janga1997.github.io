@@ -29,7 +29,6 @@ def corners(x, y, radius, breadth, length):
     return False
 
 def automateMicro(data):
-    print('This is pretty fucking great.')
 
     masterOBJ = data
     breadth = float(masterOBJ['breadthMatrix'])
