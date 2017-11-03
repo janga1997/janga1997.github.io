@@ -38,7 +38,7 @@
 
           <div class="row" style="text-align: center;">
             <label for="uploadFile" style="font-size: 1.5em;"> Upload Data </label>
-            <input type="checkbox" id="uploadFile" v-model='uploadFile' style="zoom:2">
+            <input type="checkbox" id="uploadFile" v-model='uploadFile' v-on:change="clearEverything" style="zoom:2">
           </div>
 
           <div class="row">
@@ -50,13 +50,22 @@
                 <option value="hex">Hexagonal</option>
               </select>
             </div>
-            <div class="six columns" v-if="packingType == 'random'">
+            <div class="six columns" v-if="uploadFile">
+              <label for="imageData">Data Type</label>
+              <select class="u-full-width" id="imageData" v-model='imageData' v-on:change="clearEverything">
+                <option value="CSVCenter">CSV (Center and Radius)</option>
+                <option value="CSVThree">CSV (Three Point)</option>
+                <option value="Image">Image</option>
+              </select>
+            </div>
+            <div class="six columns" v-if="packingType == 'random' && !uploadFile">
               <label for="smallFib">Smaller Fibres</label>
               <input type="checkbox" id="smallFib" v-model='smallFib' style="zoom:2">
             </div>
             <div class="six columns" v-if="uploadFile">
-              <label for="csvData">CSV File</label>
-              <input type="file" id="csvData" size="120" v-on:click="clearCSV" v-on:change="parseCSV">
+              <label for="csvData">{{ imageData }} File</label>
+              <input type="file" id="csvData" size="120" v-on:click="clearCSV" v-on:change="parseCSV" v-if="imageData != 'Image'">
+              <input type="file" id="imageUpload" size="120" v-on:change="handleImage" v-if="imageData == 'Image'">
             </div>
           </div>
 
@@ -95,7 +104,7 @@
           <hr>
 
           <button type="button" style="margin-left: 40%" class="button-primary" v-if="!uploadFile" id="buttonCS" :onclick="'generate_' + packingType + '()'">Generate Cross Section</button>
-          <button type="button" style="margin-left: 40%" class="button-primary" v-if="uploadFile" id="buttonCS" :onclick="'generate_upload()'">Generate Cross Section</button>
+          <button type="button" style="margin-left: 40%" class="button-primary" v-if="uploadFile" id="buttonCS" :onclick="'generate_upload_' + imageData + '()'">Generate Cross Section</button>
           <hr>
 
           <div class="row">
@@ -200,6 +209,7 @@
 <script type="text/javascript" src="js/three.js"></script>
 <script type="text/javascript" src="js/TrackballControls.js"></script>
 <script type="text/javascript" src='js/vue.min.js'></script>
+<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
 <script type="text/javascript" src="js/alertify.js"></script>
 <script type="text/javascript" src='js/toxiclibs.min.js'></script>
 <script type="text/javascript" src='js/papaparse.min.js'></script>

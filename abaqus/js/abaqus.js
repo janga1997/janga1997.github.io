@@ -1,6 +1,9 @@
 var timer;
 var animationId;
 var d3Timer;
+var tempCircle = [];
+var interval;
+
 
 var masterObject = new Vue({
   el: "#masterAbaqus",
@@ -12,6 +15,7 @@ var masterObject = new Vue({
     depthMatrix: 100,
     generatedCenters: [],
     csvCircles: [],
+    imageCircles: [],
     volumeFraction: 0.3,
     numFibres: 50,
     fibreYM: 100000,
@@ -21,6 +25,7 @@ var masterObject = new Vue({
     meshSeed: 2,
     padding: 0,
     uploadFile: false,
+    imageData: "Image",
     fileName: "sample.py"
   },
   methods: {
@@ -29,10 +34,88 @@ var masterObject = new Vue({
 
     },
     clearCSV : function (event) {
+
       event.target.value = "";
+    },
+
+    clearEverything : function () {
+
+      if (this.imageData != "Image" && this.uploadFile == true){
+        document.getElementById('imageUpload').value = null;        
+      }
+
+      console.log('Cleared interval');
+      clearInterval(interval);
+      $(document).off('keydown');
+    masterObject.imageCircles = [];
+    tempCircle = [];
+    },
+
+    handleImage : function (e){
+
+      this.clearEverything();
+
+      document.getElementById('svgCS').innerHTML = "";
+      var canvas = document.createElement('canvas');
+      document.getElementById('svgCS').appendChild(canvas);
+      var context = canvas.getContext("2d");
+      var mapSprite = new Image();
+
+      var reader = new FileReader();
+      reader.onload = function(event){
+        mapSprite.onload = function(){
+          masterObject.breadthMatrix = mapSprite.width;
+          masterObject.lengthMatrix = mapSprite.height;
+          canvas.width = mapSprite.width;
+          canvas.height = mapSprite.height;
+          context.drawImage(mapSprite,0,0);
+        }
+        mapSprite.src = event.target.result;
+      }
+      reader.readAsDataURL(e.target.files[0]);
+
+      masterObject.generatedCenters = [];
+      canvas.addEventListener("mousedown", mouseClicked, false);
+
+      $(document).keydown(function(e){
+       if( e.which === 90 && e.ctrlKey ){
+        masterObject.imageCircles = masterObject.imageCircles.slice(0, -1);
+        console.log('Key Pressed');
+
+      }
+      });
+
+      interval = setInterval(function(){     
+
+        console.log('Janga Redyd');
+
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(mapSprite, 0, 0, mapSprite.width, mapSprite.height);
+
+        for (var i = 0; i < tempCircle.length; i++) {
+          context.fillStyle = "red";
+          context.beginPath();
+          context.arc(tempCircle[i][0], tempCircle[i][1], 5, 0, 2 * Math.PI);
+          context.fill();
+        }
+
+        for (var i = 0; i < masterObject.imageCircles.length; i++) {
+
+          var circle = masterObject.imageCircles[i]
+          context.fillStyle = "red";
+          context.beginPath();
+          context.arc(circle.x, circle.y, circle.getRadius(), 0, 2 * Math.PI);
+          context.fill();
+        }
+
+
+      }, 30);
+
+
     }
   }
 });
+
 
 function generate_random() {
   var completed = false;
@@ -337,7 +420,89 @@ function generate_hex() {
   }
 }
 
-function generate_upload() {
+var mouseClicked = function(mouse){
+
+    if (mouse.button != 0){
+      return;
+    }
+
+
+    var canvas = document.getElementById('svgCS').childNodes[0];
+    var rect = canvas.getBoundingClientRect();
+    var mouseXPos = (mouse.x - rect.left);
+    var mouseYPos = (mouse.y - rect.top);
+
+
+    // Move the marker when placed to a better location
+    var marker = [mouseXPos, mouseYPos];
+
+    tempCircle.push(marker);
+
+    if (tempCircle.length == 3) {
+
+      var Vec2D = toxi.geom.Vec2D,
+      Circle = toxi.geom.Circle;
+
+      var p1, p2, p3, circle;
+
+      for (var i = 0; i < tempCircle.length; i++) {
+        tempCircle[i] = new Vec2D(tempCircle[i][0], tempCircle[i][1]);
+      }
+
+      circle = Circle.from3Points(tempCircle[0], tempCircle[1], tempCircle[2]);
+      masterObject.imageCircles.push(circle);
+
+      tempCircle= [];
+    }
+  }
+
+function generate_upload_Image() {
+
+  document.getElementById('imageUpload').value = null;
+  clearInterval(interval);
+  $(document).off('keydown');
+
+  var scene = add_scene();
+  add_cube(scene);
+
+  masterObject.generatedCenters = [];
+
+  var row, radius, fibreArea;
+
+  for (var i = 0; i < masterObject.imageCircles.length; i++) {
+    row = masterObject.imageCircles[i];
+
+    radius = row.getRadius();
+    fibreArea += Math.PI * radius * radius;
+
+    masterObject.generatedCenters.push([row.x, row.y, radius]);
+    add_fibre(scene, row.x, row.y, radius);
+  }
+
+  masterObject.volumeFraction = fibreArea / (masterObject.breadthMatrix * masterObject.lengthMatrix);
+
+}
+
+function generate_upload_CSVCenter() {
+
+  var scene = add_scene();
+  add_cube(scene);
+
+  masterObject.generatedCenters = [];
+
+  var row;
+  var fibreArea = 0;
+
+  for (var i = 0; i < masterObject.csvCircles.length; i++) {
+    row = masterObject.csvCircles[i];
+
+    //Drawing a circle
+    masterObject.generatedCenters.push([row[1], row[2], row[0]]);
+    add_fibre(scene, row[1], row[2], row[0]);
+  }
+}
+
+function generate_upload_CSVThree() {
 
   var Vec2D = toxi.geom.Vec2D,
   Circle = toxi.geom.Circle;
@@ -345,16 +510,8 @@ function generate_upload() {
   var height = masterObject.lengthMatrix;
   var width = masterObject.breadthMatrix
 
-  document.getElementById('svgCS').innerHTML = "";
-
-  var canvas = d3.select("#svgCS").append("canvas")
-  .attr("width", width)
-  .attr("height", height);
-
-  var context = canvas.node().getContext("2d");
-
-  context.fillStyle = "grey";
-  context.fillRect(0, 0, width, height);
+  var scene = add_scene();
+  add_cube(scene);
 
   masterObject.generatedCenters = [];
 
@@ -368,11 +525,8 @@ function generate_upload() {
     circle = Circle.from3Points(p1, p2, p3);
 
     //Drawing a circle
-    context.fillStyle = "black";
-    context.beginPath();
-    context.arc(circle.x, circle.y, circle.getRadius(), 0, 2 * Math.PI, true);
-    context.fill();
-    context.closePath();    
+    masterObject.generatedCenters.push([circle.x, circle.y, circle.getRadius()]);
+    add_fibre(scene, circle.x, circle.y, circle.getRadius());
   }
 }
 
@@ -446,26 +600,26 @@ function add_scene() {
 
   var animate = function () {
 
-  timer = setTimeout(function() {
-    animationId = requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-    controls.update();
-  }, 1000/20);
+    timer = setTimeout(function() {
+      animationId = requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+      controls.update();
+    }, 1000/60);
 
- };
+  };
 
   if (!timer) {
    animate();
    console.log(timer);
    console.log(animationId);
-  }
-  else {
-    cancelAnimationFrame(animationId);
-    clearTimeout(timer);
-    animate();
-  }
+ }
+ else {
+  cancelAnimationFrame(animationId);
+  clearTimeout(timer);
+  animate();
+}
 
- return scene;
+return scene;
 }
 
 function add_cube(scene) {
@@ -494,7 +648,7 @@ function add_fibre(scene, x, y, radius) {
   var depth = Number(masterObject.depthMatrix);
 
   // console.log(depth + 1);
-  geometry = new THREE.CylinderGeometry( radius, radius, 1.01*depth , 10);
+  geometry = new THREE.CylinderGeometry( radius, radius, 1.01*depth , 20);
   material = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0} );
   var small = new THREE.Mesh( geometry, material );
   var edges = new THREE.EdgesGeometry( geometry );
