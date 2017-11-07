@@ -467,7 +467,7 @@ function generate_upload_Image() {
 
   masterObject.generatedCenters = [];
 
-  var row, radius, fibreArea;
+  var row, radius, fibreArea = 0;
 
   for (var i = 0; i < masterObject.imageCircles.length; i++) {
     row = masterObject.imageCircles[i];
