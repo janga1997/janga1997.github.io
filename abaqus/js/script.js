@@ -90,7 +90,7 @@ def automateMicro(data):
                 COPLANAR_EDGES, sketch=mdb.models['Model-1'].sketches['__fibre__'])
 
             mdb.models['Model-1'].sketches['__fibre__'].rectangle(point1=(0, 0), point2=(breadth, length))
-            mdb.models['Model-1'].sketches['__fibre__'].rectangle(point1=(-radius, -radius), point2=(breadth + radius, length + radius))
+            mdb.models['Model-1'].sketches['__fibre__'].rectangle(point1=(-breadth, -length), point2=(breadth*2, length*2))
 
             mdb.models['Model-1'].parts[fibre_name].CutExtrude(flipExtrudeDirection=OFF, 
                 sketch=mdb.models['Model-1'].sketches['__fibre__'], sketchOrientation=
