@@ -678,13 +678,11 @@ function getFile() {
   //   fileObject.directions.push(Number(document.getElementById(s + 'Comp-both').checked))
   // }
 
-  fileObject = 'data = ' + JSON.stringify(fileObject);
+  fileObject = "data = '" + JSON.stringify(fileObject) = "'";
 
-  fileObject = fileObject.replace('true', 'True');
-  fileObject = fileObject.replace('false', 'False');
 
   fileObject = pythonFile + fileObject;
-  fileObject += '\nautomateMicro(data)';
+  fileObject += '\nautomateMicro(json.loads(data))';
   var file = new File([fileObject], masterObject.fileName);
   saveAs(file);
 }
