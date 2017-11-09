@@ -680,7 +680,7 @@ function getFile() {
   //   fileObject.directions.push(Number(document.getElementById(s + 'Comp-both').checked))
   // }
 
-  fileObject = "data = '" + JSON.stringify(fileObject) = "'";
+  fileObject = "data = '" + JSON.stringify(fileObject) + "'";
 
 
   fileObject = pythonFile + fileObject;
