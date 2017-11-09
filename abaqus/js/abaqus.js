@@ -23,7 +23,7 @@ var masterObject = new Vue({
     matrixYM: 800000,
     matrixPR: 0.8,
     meshSeed: 2,
-    padding: 0,
+    padding: Infinity,
     uploadFile: false,
     imageData: "Image",
     fileName: "sample.py"
@@ -134,7 +134,7 @@ function generate_random() {
 
   var fibreArea = volumeFraction * (width)  * (height );
 
-  var k = 1000, // initial number of candidates to consider per circle
+  var k = 10, // initial number of candidates to consider per circle
   m = 10;
 
   var scene = add_scene();
@@ -177,7 +177,9 @@ function generate_random() {
 
       // As we add more circles, generate more candidates per circle.
       // Since this takes more effort, gradually reduce circles per frame.
-      if (k < 500) k *= maxRadius/circle[2], m *= 2;
+      // if (k < 500) k *= maxRadius/circle[2], m *= 2;
+
+      k = 10 * masterObject.generatedCenters.length;
     }
 
     if (completed) {
