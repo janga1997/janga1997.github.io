@@ -143,7 +143,7 @@ def automateMicro(data):
     mdb.models['Model-1'].rootAssembly.DatumCsysByDefault(CARTESIAN)
 
     # Assembly
-    mdb.models['Model-1'].rootAssembly.Instance(dependent=ON, name='Matrix_Instance', 
+    mdb.models['Model-1'].rootAssembly.Instance(dependent=ON, name='Matrix_instance',
         part=mdb.models['Model-1'].parts['Matrix'])
 
     for ii in range(len(masterOBJ['generatedCenters'])):
@@ -173,7 +173,7 @@ def automateMicro(data):
             surface_point = (x - radius, y, height/2)
 
         mdb.models['Model-1'].rootAssembly.Surface(name=matrix_surface, side1Faces=
-            mdb.models['Model-1'].rootAssembly.instances['Matrix_Instance'].faces.findAt((surface_point,),))
+            mdb.models['Model-1'].rootAssembly.instances['Matrix_instance'].faces.findAt((surface_point,),))
 
         #Fibre Surfaces
         mdb.models['Model-1'].rootAssembly.Surface(name=fibre_surface, side1Faces=
@@ -193,20 +193,19 @@ def automateMicro(data):
 
 
     # Load Application
+
     point = masterOBJ['loadSurfaces'][0]
-    loadRegion = mdb.models['Model-1'].rootAssembly.instances[fibre_instance].faces.findAt((point,),)
-    for ii, point in enumerate(masterOBJ['loadSurfaces'][1:]):
-        fibre_name = 'Fibre_'+str(ii)
-        fibre_instance = fibre_name + '_instance'
-        loadRegion += mdb.models['Model-1'].rootAssembly.instances[fibre_instance].faces.findAt((point,),)
+    loadRegion = mdb.models['Model-1'].rootAssembly.instances[point[0] + '_instance'].faces.findAt((point[1:],),)
+    for point in masterOBJ['loadSurfaces'][1:]:
+        loadRegion += mdb.models['Model-1'].rootAssembly.instances[point[0] + '_instance'].faces.findAt((point[1:],),)
 
     mdb.models['Model-1'].Pressure(amplitude=UNSET, createStepName='Step-1', 
         distributionType=UNIFORM, field='', magnitude=-1.0, name='Load-1', region=Region(side1Faces=loadRegion))
 
     # mdb.models['Model-1'].rootAssembly.Surface(name='Surf-3', side1Faces=
-    #     mdb.models['Model-1'].rootAssembly.instances['Matrix_Instance'].faces.findAt(((0, length/2, height/2),),))
+    #     mdb.models['Model-1'].rootAssembly.instances['Matrix_instance'].faces.findAt(((0, length/2, height/2),),))
     # mdb.models['Model-1'].rootAssembly.Surface(name='Surf-4', side1Faces=
-    #     mdb.models['Model-1'].rootAssembly.instances['Matrix_Instance'].faces.findAt(((breadth, length/2, height/2),),))
+    #     mdb.models['Model-1'].rootAssembly.instances['Matrix_instance'].faces.findAt(((breadth, length/2, height/2),),))
     # mdb.models['Model-1'].Pressure(amplitude=UNSET, createStepName='Step-1', 
     #     distributionType=UNIFORM, field='', magnitude=-1.0, name='Load-2', region=
     #     mdb.models['Model-1'].rootAssembly.surfaces['Surf-4'])
@@ -218,7 +217,7 @@ def automateMicro(data):
         fibre_instance = fibre_name + '_instance'
         instances.append( mdb.models['Model-1'].rootAssembly.instances[fibre_instance])
 
-    instances.append(mdb.models['Model-1'].rootAssembly.instances['Matrix_Instance'])
+    instances.append(mdb.models['Model-1'].rootAssembly.instances['Matrix_instance'])
 
     mdb.models['Model-1'].rootAssembly.makeIndependent(instances=instances)
 

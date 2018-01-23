@@ -4,9 +4,13 @@ function handleLoad(centers, breadth, length, depth, direction) {
       'x': 0,
       'y': 1
     },
-    dims = [breadth, depth];
+    dims = [breadth, length];
   var index = axes[direction],
     comp = Number(!axes[direction]);
+
+  var centers = centers.map(function(val, index) {
+    return val.concat(index);
+  });
 
   var lower = centers.filter(function(val) {
     return val[index] < val[2];
@@ -31,8 +35,8 @@ function handleLoad(centers, breadth, length, depth, direction) {
 
     if (current.length == 0) {
       dummy[index] = edge;
-      dummy[comp] = length / 2;
-      answer.push(dummy.slice());
+      dummy[comp] =  dims[comp]/ 2;
+      answer.push(['Matrix'].concat(dummy.slice()))
       continue;
     }
 
@@ -42,31 +46,31 @@ function handleLoad(centers, breadth, length, depth, direction) {
     if (current[0][comp] > current[0][2]) {
       dummy[index] = edge;
       dummy[comp] = current[0][comp] / 2;
-      answer.push(dummy.slice());
+      answer.push(['Matrix'].concat(dummy.slice()));
     }
 
     dummy[index] = edge;
     dummy[comp] = current[0][comp];
-    answer.push(dummy.slice());
+    answer.push(['Fibre_'+current[0][3]].concat(dummy.slice()));
     for (var j = 1; j < current.length; j++) {
       mean = (start + current[j][comp]) / 2;
 
       dummy[index] = edge;
       dummy[comp] = mean;
-      answer.push(dummy.slice());
+      answer.push(['Matrix'].concat(dummy.slice()))
 
       start = current[j][comp];
 
       dummy[index] = edge;
       dummy[comp] = current[j][comp];
-      answer.push(dummy.slice());
+      answer.push(['Fibre_'+current[j][3]].concat(dummy.slice()));
     }
 
     var max = current[current.length - 1];
     if (max[comp] < dims[comp] - max[2]) {
       dummy[index] = edge;
       dummy[comp] = (max[comp] + dims[comp]) / 2;
-      answer.push(dummy.slice());
+      answer.push(['Matrix'].concat(dummy.slice()))
     }
   }
 
