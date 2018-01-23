@@ -14,44 +14,46 @@ var masterObject = new Vue({
     breadthMatrix: 100,
     depthMatrix: 100,
     generatedCenters: [],
+    loadSurfaces: [],
     csvCircles: [],
     imageCircles: [],
     volumeFraction: 0.3,
     numFibres: 50,
-    fibreYM: 100000,
-    fibrePR: 0.5,
-    matrixYM: 800000,
-    matrixPR: 0.8,
+    fibreYM: 72000,
+    fibrePR: 0.2,
+    matrixYM: 3500,
+    matrixPR: 0.2,
     meshSeed: 2,
+    loadDir: 'x',
     padding: Infinity,
     uploadFile: false,
     imageData: "Image",
     fileName: "sample.py"
   },
   methods: {
-    parseCSV : function (event) {
+    parseCSV: function(event) {
       parse_csv(event.target.files[0]);
-
     },
-    clearCSV : function (event) {
+
+    clearCSV: function(event) {
 
       event.target.value = "";
     },
 
-    clearEverything : function () {
+    clearEverything: function() {
 
-      if (this.imageData != "Image" && this.uploadFile == true){
-        document.getElementById('imageUpload').value = null;        
+      if (this.imageData != "Image" && this.uploadFile == true) {
+        document.getElementById('imageUpload').value = null;
       }
 
       console.log('Cleared interval');
       clearInterval(interval);
       $(document).off('keydown');
-    masterObject.imageCircles = [];
-    tempCircle = [];
+      masterObject.imageCircles = [];
+      tempCircle = [];
     },
 
-    handleImage : function (e){
+    handleImage: function(e) {
 
       this.clearEverything();
 
@@ -62,13 +64,13 @@ var masterObject = new Vue({
       var mapSprite = new Image();
 
       var reader = new FileReader();
-      reader.onload = function(event){
-        mapSprite.onload = function(){
+      reader.onload = function(event) {
+        mapSprite.onload = function() {
           masterObject.breadthMatrix = mapSprite.width;
           masterObject.lengthMatrix = mapSprite.height;
           canvas.width = mapSprite.width;
           canvas.height = mapSprite.height;
-          context.drawImage(mapSprite,0,0);
+          context.drawImage(mapSprite, 0, 0);
         }
         mapSprite.src = event.target.result;
       }
@@ -77,15 +79,15 @@ var masterObject = new Vue({
       masterObject.generatedCenters = [];
       canvas.addEventListener("mousedown", mouseClicked, false);
 
-      $(document).keydown(function(e){
-       if( e.which === 90 && e.ctrlKey ){
-        masterObject.imageCircles = masterObject.imageCircles.slice(0, -1);
-        console.log('Key Pressed');
+      $(document).keydown(function(e) {
+        if (e.which === 90 && e.ctrlKey) {
+          masterObject.imageCircles = masterObject.imageCircles.slice(0, -1);
+          console.log('Key Pressed');
 
-      }
+        }
       });
 
-      interval = setInterval(function(){     
+      interval = setInterval(function() {
 
         console.log('Janga Redyd');
 
@@ -110,9 +112,21 @@ var masterObject = new Vue({
 
 
       }, 30);
+    },
 
+    loadChange: function() {
+      var centers = masterObject.generatedCenters,
+        breadth = masterObject.breadthMatrix,
+        length = masterObject.lengthMatrix,
+        depth = masterObject.depthMatrix;
 
+      if (!centers.length) {
+        return;
+      }
+
+      masterObject.loadSurfaces = handleLoad(centers, breadth, length, depth, masterObject.loadDir);
     }
+
   }
 });
 
@@ -126,16 +140,16 @@ function generate_random() {
   var numFibres = masterObject.numFibres;
   var volumeFraction = masterObject.volumeFraction;
 
-  var maxRadius = Math.sqrt(volumeFraction * height * width/ (Math.PI * numFibres));
+  var maxRadius = Math.sqrt(volumeFraction * height * width / (Math.PI * numFibres));
   var minRadius = maxRadius;
-  var newCircle = bestCircleGenerator(1.05*maxRadius, 0.05*maxRadius, width , height);
+  var newCircle = bestCircleGenerator(1.05 * maxRadius, 0.05 * maxRadius, width, height);
 
-  masterObject.padding = 0.05*maxRadius;
+  masterObject.padding = 0.05 * maxRadius;
 
-  var fibreArea = volumeFraction * (width)  * (height );
+  var fibreArea = volumeFraction * (width) * (height);
 
   var k = 10, // initial number of candidates to consider per circle
-  m = 10;
+    m = 10;
 
   var scene = add_scene();
   add_cube(scene);
@@ -183,29 +197,33 @@ function generate_random() {
     }
 
     if (completed) {
-      var error = ((generatedArea - fibreArea)*(100/fibreArea)).toFixed(3);
+      var error = ((generatedArea - fibreArea) * (100 / fibreArea)).toFixed(3);
       var logMsg = document.createElement('h1');
       logMsg.innerHTML = "Error: " + error + "%";
       var bottom = document.createElement('h5');
       bottom.innerHTML = "greater than required volume fraction";
       alertify.log(logMsg.outerHTML + bottom.outerHTML);
 
-      document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5)
-      + "\nMaximum Radius: " + maxRadius.toFixed(5);
+      document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5) +
+        "\nMaximum Radius: " + maxRadius.toFixed(5);
+
+      masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, vertical, masterObject.loadDir);
 
       d3Timer.stop();
     }
 
     if (fibreArea <= generatedArea) {
-      var error = ((generatedArea - fibreArea)*(100/fibreArea)).toFixed(3);
+      var error = ((generatedArea - fibreArea) * (100 / fibreArea)).toFixed(3);
       var logMsg = document.createElement('h1');
       logMsg.innerHTML = "Error: " + error + "%";
       var bottom = document.createElement('h5');
       bottom.innerHTML = "greater than required volume fraction";
       alertify.log(logMsg.outerHTML + bottom.outerHTML);
 
-      document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5)
-      + "\nMaximum Radius: " + maxRadius.toFixed(5);
+      document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5) +
+        "\nMaximum Radius: " + maxRadius.toFixed(5);
+
+      masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, vertical, masterObject.loadDir);
 
       d3Timer.stop();
     }
@@ -213,35 +231,38 @@ function generate_random() {
   });
 
   function bestCircleGenerator(maxRadius, padding, width, height) {
-    var quadtree = d3.quadtree().extent([[0, 0], [width, height]]),
-    searchRadius = maxRadius * 2,
-    maxRadius2 = maxRadius * maxRadius;
+    var quadtree = d3.quadtree().extent([
+        [0, 0],
+        [width, height]
+      ]),
+      searchRadius = maxRadius * 2,
+      maxRadius2 = maxRadius * maxRadius;
 
     return function(k) {
       var bestX, bestY, bestDistance = 0;
 
-      for (var i = 0; i < k || bestDistance < padding ; ++i) {
+      for (var i = 0; i < k || bestDistance < padding; ++i) {
         var x = Math.random() * width,
-        y = Math.random() * height,
-        rx1 = x - searchRadius,
-        rx2 = x + searchRadius,
-        ry1 = y - searchRadius,
-        ry2 = y + searchRadius,
-        minDistance = maxRadius; // minimum distance for this candidate
+          y = Math.random() * height,
+          rx1 = x - searchRadius,
+          rx2 = x + searchRadius,
+          ry1 = y - searchRadius,
+          ry2 = y + searchRadius,
+          minDistance = maxRadius; // minimum distance for this candidate
 
         quadtree.visit(function(quad, x1, y1, x2, y2) {
           if (p = quad.data) {
             var p,
-            dx = x - p[0],
-            dy = y - p[1],
-            d2 = dx * dx + dy * dy,
-            r2 = p[2] * p[2];
-        if (d2 < r2) return minDistance = 0, true; // within a circle
-        var d = Math.sqrt(d2) - p[2];
-        if (d < minDistance) minDistance = d;
-      }
-      return !minDistance || x1 > rx2 || x2 < rx1 || y1 > ry2 || y2 < ry1; // or outside search radius
-    });
+              dx = x - p[0],
+              dy = y - p[1],
+              d2 = dx * dx + dy * dy,
+              r2 = p[2] * p[2];
+            if (d2 < r2) return minDistance = 0, true; // within a circle
+            var d = Math.sqrt(d2) - p[2];
+            if (d < minDistance) minDistance = d;
+          }
+          return !minDistance || x1 > rx2 || x2 < rx1 || y1 > ry2 || y2 < ry1; // or outside search radius
+        });
 
         if (minDistance > bestDistance) bestX = x, bestY = y, bestDistance = minDistance;
       }
@@ -256,17 +277,15 @@ function generate_random() {
 
 function removeArea(circle, width, height) {
   var x = circle[0],
-  y = circle[1],
-  radius = circle[2],
-  theta, dist, area,
-  already = false;
+    y = circle[1],
+    radius = circle[2],
+    theta, dist, area,
+    already = false;
 
   if (x > width - radius) {
     dist = width - x;
     already = true;
-  }
-
-  else if (x < radius) {
+  } else if (x < radius) {
     dist = x;
     already = true;
   }
@@ -277,24 +296,20 @@ function removeArea(circle, width, height) {
     if (already) {
       return approxArea(circle, width, height);
     }
-  }
-
-  else if (y < radius) {
+  } else if (y < radius) {
     dist = y;
 
     if (already) {
       return approxArea(circle, width, height);
     }
-  }
-
-  else if ( x > radius && x < width - radius && y > radius && y < height - radius ) {
+  } else if (x > radius && x < width - radius && y > radius && y < height - radius) {
     area = Math.PI * radius * radius;
     return area;
   }
 
-  theta = Math.acos(dist/radius);
+  theta = Math.acos(dist / radius);
 
-  area = ((Math.PI - theta) * radius * radius) + dist*Math.sqrt(radius*radius - dist* dist);
+  area = ((Math.PI - theta) * radius * radius) + dist * Math.sqrt(radius * radius - dist * dist);
   return area;
 
   function approxArea(circle, width, height) {
@@ -306,17 +321,17 @@ function removeArea(circle, width, height) {
       }
     }
 
-    for (var i = 0.5; i < width; i+=0.5) {
-      for (var j = 0.5; j < height; j+=0.5) {
+    for (var i = 0.5; i < width; i += 0.5) {
+      for (var j = 0.5; j < height; j += 0.5) {
         randomPoints.push([i, j]);
       }
     }
 
-    var inPoints = randomPoints.filter(function (point) {
+    var inPoints = randomPoints.filter(function(point) {
       var dx = point[0] - circle[0],
-      dy = point[1] - circle[1];
+        dy = point[1] - circle[1];
 
-      return Math.sqrt(dx*dx + dy*dy) <= circle[2];
+      return Math.sqrt(dx * dx + dy * dy) <= circle[2];
     });
 
     return width * height * inPoints.length / randomPoints.length;
@@ -326,7 +341,8 @@ function removeArea(circle, width, height) {
 }
 
 function generate_cubic() {
-  var width = masterObject.breadthMatrix;
+  var width = masterObject.breadthMatrix,
+    depth = masterObject.depthMatrix;
 
   var numFibres = masterObject.numFibres;
   var volumeFraction = masterObject.volumeFraction;
@@ -340,45 +356,46 @@ function generate_cubic() {
   var ratio, dimensions;
 
   if (factors.length % 2 == 1) {
-    var index = (factors.length - 1)/2;
+    var index = (factors.length - 1) / 2;
     dimensions = [factors[index], factors[index]];
     ratio = 1;
-  }
-
-  else {
-    var index = factors.length/2;
+  } else {
+    var index = factors.length / 2;
     dimensions = [factors[index], factors[index - 1]];
-    ratio = dimensions[1]/dimensions[0];
+    ratio = dimensions[1] / dimensions[0];
   }
 
   var height = masterObject.lengthMatrix = ratio * width;
-  var radius = Math.sqrt(volumeFraction * height * width/ (Math.PI * numFibres));
+  var radius = Math.sqrt(volumeFraction * height * width / (Math.PI * numFibres));
 
   var scene = add_scene();
   add_cube(scene);
 
   var unit = Math.sqrt(width * height / numFibres);
 
-  masterObject.padding = (unit/2) - radius;
+  masterObject.padding = (unit / 2) - radius;
 
   masterObject.generatedCenters = [];
   for (var i = 0; i < dimensions[1]; i++) {
     for (var j = 0; j < dimensions[0]; j++) {
-      var center = [(i+0.5)*unit, (j+0.5)*unit];
+      var center = [(i + 0.5) * unit, (j + 0.5) * unit];
       masterObject.generatedCenters.push([center[1], center[0], radius]);
 
       add_fibre(scene, center[1], center[0], radius);
     }
   }
 
+  masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, depth, masterObject.loadDir);
+
 }
 
 function generate_hex() {
-  var width = masterObject.breadthMatrix;
+  var width = masterObject.breadthMatrix,
+    depth = masterObject.depthMatrix;
 
   var numFibres = masterObject.numFibres;
   var volumeFraction = masterObject.volumeFraction,
-  maxFraction = Math.PI/(2*Math.sqrt(3));
+    maxFraction = Math.PI / (2 * Math.sqrt(3));
 
   var factors = getFactors(numFibres);
 
@@ -389,20 +406,18 @@ function generate_hex() {
   var ratio, dimensions;
 
   if (factors.length % 2 == 1) {
-    var index = (factors.length - 1)/2;
+    var index = (factors.length - 1) / 2;
     dimensions = [factors[index], factors[index]];
-  }
-
-  else {
-    var index = factors.length/2;
+  } else {
+    var index = factors.length / 2;
     dimensions = [factors[index], factors[index - 1]];
   }
 
-  ratio = ((2 + (dimensions[1]-1)*Math.sqrt(3))/(2*dimensions[0]))
+  ratio = ((2 + (dimensions[1] - 1) * Math.sqrt(3)) / (2 * dimensions[0]))
 
   var height = masterObject.lengthMatrix = ratio * width;
-  var maxRadius = width/(2*dimensions[0]);
-  var radius = Math.sqrt(volumeFraction/maxFraction) * maxRadius;
+  var maxRadius = width / (2 * dimensions[0]);
+  var radius = Math.sqrt(volumeFraction / maxFraction) * maxRadius;
 
   masterObject.padding = maxRadius - radius;
 
@@ -413,50 +428,52 @@ function generate_hex() {
 
   masterObject.generatedCenters = [];
   for (var i = 0; i < dimensions[1]; i++) {
-    for (var j = 0; j < dimensions[0] + i%2; j++) {
-      var center = [maxRadius*((i+1)%2) + j*2*maxRadius, maxRadius + i*maxRadius*Math.sqrt(3)];
+    for (var j = 0; j < dimensions[0] + i % 2; j++) {
+      var center = [maxRadius * ((i + 1) % 2) + j * 2 * maxRadius, maxRadius + i * maxRadius * Math.sqrt(3)];
       masterObject.generatedCenters.push([center[0], center[1], radius]);
 
       add_fibre(scene, center[0], center[1], radius);
     }
   }
+
+  masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, depth, masterObject.loadDir);
 }
 
-var mouseClicked = function(mouse){
+var mouseClicked = function(mouse) {
 
-    if (mouse.button != 0){
-      return;
-    }
-
-
-    var canvas = document.getElementById('svgCS').childNodes[0];
-    var rect = canvas.getBoundingClientRect();
-    var mouseXPos = (mouse.x - rect.left);
-    var mouseYPos = (mouse.y - rect.top);
+  if (mouse.button != 0) {
+    return;
+  }
 
 
-    // Move the marker when placed to a better location
-    var marker = [mouseXPos, mouseYPos];
+  var canvas = document.getElementById('svgCS').childNodes[0];
+  var rect = canvas.getBoundingClientRect();
+  var mouseXPos = (mouse.x - rect.left);
+  var mouseYPos = (mouse.y - rect.top);
 
-    tempCircle.push(marker);
 
-    if (tempCircle.length == 3) {
+  // Move the marker when placed to a better location
+  var marker = [mouseXPos, mouseYPos];
 
-      var Vec2D = toxi.geom.Vec2D,
+  tempCircle.push(marker);
+
+  if (tempCircle.length == 3) {
+
+    var Vec2D = toxi.geom.Vec2D,
       Circle = toxi.geom.Circle;
 
-      var p1, p2, p3, circle;
+    var p1, p2, p3, circle;
 
-      for (var i = 0; i < tempCircle.length; i++) {
-        tempCircle[i] = new Vec2D(tempCircle[i][0], tempCircle[i][1]);
-      }
-
-      circle = Circle.from3Points(tempCircle[0], tempCircle[1], tempCircle[2]);
-      masterObject.imageCircles.push(circle);
-
-      tempCircle= [];
+    for (var i = 0; i < tempCircle.length; i++) {
+      tempCircle[i] = new Vec2D(tempCircle[i][0], tempCircle[i][1]);
     }
+
+    circle = Circle.from3Points(tempCircle[0], tempCircle[1], tempCircle[2]);
+    masterObject.imageCircles.push(circle);
+
+    tempCircle = [];
   }
+}
 
 function generate_upload_Image() {
 
@@ -507,7 +524,7 @@ function generate_upload_CSVCenter() {
 function generate_upload_CSVThree() {
 
   var Vec2D = toxi.geom.Vec2D,
-  Circle = toxi.geom.Circle;
+    Circle = toxi.geom.Circle;
 
   var height = masterObject.lengthMatrix;
   var width = masterObject.breadthMatrix
@@ -535,7 +552,7 @@ function generate_upload_CSVThree() {
 function alertAbaqus() {
   // body...
   var msg = "<h3>Error : 0.1 %</h3>" +
-  "<p>greater than the required fibre area</p>";
+    "<p>greater than the required fibre area</p>";
   alertify.log(msg);
 }
 
@@ -559,90 +576,97 @@ function parse_csv(file) {
   Papa.parse(file, {
     dynamicTyping: true,
     complete: function(results) {
-          masterObject.csvCircles = results.data; // results appear in dev console
+      masterObject.csvCircles = results.data; // results appear in dev console
 
-          masterObject.csvCircles = masterObject.csvCircles.filter(function(arr){ return arr.length > 1 });
-
-          masterObject.breadthMatrix = Number(masterObject.csvCircles[0][0]);
-          masterObject.lengthMatrix = Number(masterObject.csvCircles[0][1]);
-          masterObject.depthMatrix = Number(masterObject.csvCircles[0][2]);
-          masterObject.csvCircles = masterObject.csvCircles.slice(1);
-          masterObject.numFibres = masterObject.csvCircles.length;
-        }
+      masterObject.csvCircles = masterObject.csvCircles.filter(function(arr) {
+        return arr.length > 1
       });
+
+      masterObject.breadthMatrix = Number(masterObject.csvCircles[0][0]);
+      masterObject.lengthMatrix = Number(masterObject.csvCircles[0][1]);
+      masterObject.depthMatrix = Number(masterObject.csvCircles[0][2]);
+      masterObject.csvCircles = masterObject.csvCircles.slice(1);
+      masterObject.numFibres = masterObject.csvCircles.length;
+    }
+  });
 
 }
 
 function add_scene() {
   var length = masterObject.lengthMatrix,
-  breadth = masterObject.breadthMatrix,
-  depth = masterObject.depthMatrix;
+    breadth = masterObject.breadthMatrix,
+    depth = masterObject.depthMatrix;
 
   document.getElementById('svgCS').innerHTML = "";
 
-  var container = document.getElementById( 'svgCS' );
+  var container = document.getElementById('svgCS');
 
   var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.6, 5000);
+  var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.6, 5000);
 
   var cameraPos = Math.max(length, breadth, depth);
-  cameraPos = 1.5*cameraPos;
+  cameraPos = 1.5 * cameraPos;
   camera.position.set(cameraPos, cameraPos, cameraPos); // all components equal
-  camera.lookAt( breadth/2, length/2, depth/2); // or the origin
+  camera.lookAt(breadth / 2, length / 2, depth / 2); // or the origin
 
   var renderer = new THREE.WebGLRenderer();
-  renderer.setSize( window.innerWidth/1.5, window.innerHeight/1.5 );
-  container.appendChild( renderer.domElement );
+  renderer.setSize(window.innerWidth / 1.5, window.innerHeight / 1.5);
+  container.appendChild(renderer.domElement);
 
-  var controls = new THREE.TrackballControls( camera , renderer.domElement);
-  controls.target.set( breadth/2, length/2, depth/2 );
+  var controls = new THREE.TrackballControls(camera, renderer.domElement);
+  controls.target.set(breadth / 2, length / 2, depth / 2);
 
   controls.rotateSpeed = 2.0;
 
 
-  var animate = function () {
+  var animate = function() {
 
     timer = setTimeout(function() {
       animationId = requestAnimationFrame(animate);
       renderer.render(scene, camera);
       controls.update();
-    }, 1000/60);
+    }, 1000 / 60);
 
   };
 
   if (!timer) {
-   animate();
-   console.log(timer);
-   console.log(animationId);
- }
- else {
-  cancelAnimationFrame(animationId);
-  clearTimeout(timer);
-  animate();
-}
+    animate();
+    console.log(timer);
+    console.log(animationId);
+  } else {
+    cancelAnimationFrame(animationId);
+    clearTimeout(timer);
+    animate();
+  }
 
-return scene;
+  return scene;
 }
 
 function add_cube(scene) {
 
   var length = masterObject.lengthMatrix,
-  breadth = masterObject.breadthMatrix,
-  depth = masterObject.depthMatrix;
+    breadth = masterObject.breadthMatrix,
+    depth = masterObject.depthMatrix;
 
-  var axisHelper = new THREE.AxisHelper( 1.5*Math.max(length, breadth, depth) );
-  scene.add( axisHelper );
+  var axisHelper = new THREE.AxisHelper(1.5 * Math.max(length, breadth, depth));
+  scene.add(axisHelper);
 
-  var geometry = new THREE.BoxGeometry( breadth, length, depth );
-  var material = new THREE.MeshBasicMaterial( { color: 0x2F4F4F, opacity: 0.95, transparent: true} );
-  var edges = new THREE.EdgesGeometry( geometry );
-  var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
-  scene.add( line );
-  var cube = new THREE.Mesh( geometry, material );
+  var geometry = new THREE.BoxGeometry(breadth, length, depth);
+  var material = new THREE.MeshBasicMaterial({
+    color: 0x2F4F4F,
+    opacity: 0.95,
+    transparent: true
+  });
+  var edges = new THREE.EdgesGeometry(geometry);
+  var line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
+    color: 0xffffff
+  }));
+  scene.add(line);
+  var cube = new THREE.Mesh(geometry, material);
   scene.add(cube);
 
-  line.position.set(breadth/2, length/2, depth/2);  
-  cube.position.set(breadth/2, length/2, depth/2);
+  line.position.set(breadth / 2, length / 2, depth / 2);
+  cube.position.set(breadth / 2, length / 2, depth / 2);
 }
 
 function add_fibre(scene, x, y, radius) {
@@ -650,19 +674,24 @@ function add_fibre(scene, x, y, radius) {
   var depth = Number(masterObject.depthMatrix);
 
   // console.log(depth + 1);
-  geometry = new THREE.CylinderGeometry( radius, radius, 1.01*depth , 20);
-  material = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0} );
-  var small = new THREE.Mesh( geometry, material );
-  var edges = new THREE.EdgesGeometry( geometry );
-  var line1 = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0 } ) );
-  scene.add( line1 );
-  scene.add( small );
+  geometry = new THREE.CylinderGeometry(radius, radius, 1.01 * depth, 20);
+  material = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    opacity: 0
+  });
+  var small = new THREE.Mesh(geometry, material);
+  var edges = new THREE.EdgesGeometry(geometry);
+  var line1 = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
+    color: 0
+  }));
+  scene.add(line1);
+  scene.add(small);
 
-  small.position.set(x, y, depth/2);
-  line1.position.set(x, y, depth/2);
+  small.position.set(x, y, depth / 2);
+  line1.position.set(x, y, depth / 2);
 
-  small.rotation.x = 0.5*Math.PI;
-  line1.rotation.x = 0.5*Math.PI;
+  small.rotation.x = 0.5 * Math.PI;
+  line1.rotation.x = 0.5 * Math.PI;
 }
 
 function getFile() {

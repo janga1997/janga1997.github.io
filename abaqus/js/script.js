@@ -155,7 +155,6 @@ def automateMicro(data):
 
     mdb.models['Model-1'].StaticStep(name='Step-1', previous='Initial')
 
-
     for ii, var in enumerate(masterOBJ['generatedCenters']):
 
         x, y = var[:2]
@@ -178,7 +177,7 @@ def automateMicro(data):
 
         #Fibre Surfaces
         mdb.models['Model-1'].rootAssembly.Surface(name=fibre_surface, side1Faces=
-            mdb.models['Model-1'].rootAssembly.instances[fibre_instance].faces.getSequenceFromMask(('[#1 ]', ), ))
+            mdb.models['Model-1'].rootAssembly.instances[fibre_instance].faces.findAt((surface_point,),))
 
     for ii in range(len(masterOBJ['generatedCenters'])):
 
@@ -193,11 +192,19 @@ def automateMicro(data):
             tieRotations=ON)
 
 
+    # Load Application
+    point = masterOBJ['loadSurfaces'][0]
+    loadRegion = mdb.models['Model-1'].rootAssembly.instances[fibre_instance].faces.findAt((point,),)
+    for ii, point in enumerate(masterOBJ['loadSurfaces'][1:]):
+        fibre_name = 'Fibre_'+str(ii)
+        fibre_instance = fibre_name + '_instance'
+        loadRegion += mdb.models['Model-1'].rootAssembly.instances[fibre_instance].faces.findAt((point,),)
+
+    mdb.models['Model-1'].Pressure(amplitude=UNSET, createStepName='Step-1', 
+        distributionType=UNIFORM, field='', magnitude=-1.0, name='Load-1', region=Region(side1Faces=loadRegion))
+
     # mdb.models['Model-1'].rootAssembly.Surface(name='Surf-3', side1Faces=
     #     mdb.models['Model-1'].rootAssembly.instances['Matrix_Instance'].faces.findAt(((0, length/2, height/2),),))
-    # mdb.models['Model-1'].Pressure(amplitude=UNSET, createStepName='Step-1', 
-    #     distributionType=UNIFORM, field='', magnitude=-1.0, name='Load-1', region=
-    #     mdb.models['Model-1'].rootAssembly.surfaces['Surf-3'])
     # mdb.models['Model-1'].rootAssembly.Surface(name='Surf-4', side1Faces=
     #     mdb.models['Model-1'].rootAssembly.instances['Matrix_Instance'].faces.findAt(((breadth, length/2, height/2),),))
     # mdb.models['Model-1'].Pressure(amplitude=UNSET, createStepName='Step-1', 

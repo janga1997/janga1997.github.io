@@ -1,139 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
   <!-- Basic Page Needs
     –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-    <meta charset="utf-8">
-    <title>UD Composite</title>
-    <meta name="description" content="UD Composite Data">
-    <meta name="author" content="VSN Reddy Janga">
+  <meta charset="utf-8">
+  <title>UD Composite</title>
+  <meta name="description" content="UD Composite Data">
+  <meta name="author" content="VSN Reddy Janga">
 
   <!-- Mobile Specific Metas
     –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- CSS
     –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-    <link rel="stylesheet" href="css/normalize.min.css">
-    <link rel="stylesheet" href="css/skeleton.min.css">
+  <link rel="stylesheet" href="css/normalize.min.css">
+  <link rel="stylesheet" href="css/skeleton.min.css">
 
-  </head>
-  <body>
-    <h1 style="margin-left:35%">UD Composite Data</h1>
+</head>
 
-    <h4 style="margin-left:35%" id="minRadius"></h4>
+<body>
+  <h1 style="margin-left:35%">UD Composite Data</h1>
 
-    <div id="svgCS" style="width: 100%; text-align: center;">
+  <h4 style="margin-left:35%" id="minRadius"></h4>
 
-    </div>
+  <div id="svgCS" style="width: 100%; text-align: center;">
+
+  </div>
 
   <!-- Primary Page Layout
     –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-    <!-- The above form looks like this -->
-    <div class="container" id="masterAbaqus">
-      <hr>
-      <div class="row">
-        <form onsubmit="getFile(); return false">
+  <!-- The above form looks like this -->
+  <div class="container" id="masterAbaqus">
+    <hr>
+    <div class="row">
+      <form onsubmit="getFile(); return false">
 
-          <div class="row" style="text-align: center;">
-            <label for="uploadFile" style="font-size: 1.5em;"> Upload Data </label>
-            <input type="checkbox" id="uploadFile" v-model='uploadFile' v-on:change="clearEverything" style="zoom:2">
-          </div>
+        <div class="row" style="text-align: center;">
+          <label for="uploadFile" style="font-size: 1.5em;"> Upload Data </label>
+          <input type="checkbox" id="uploadFile" v-model='uploadFile' v-on:change="clearEverything" style="zoom:2">
+        </div>
 
-          <div class="row">
-            <div class="six columns" v-if="!uploadFile">
-              <label for="packingType">Packing Type</label>
-              <select class="u-full-width" id="packingType" v-model='packingType'>
+        <div class="row">
+          <div class="six columns" v-if="!uploadFile">
+            <label for="packingType">Packing Type</label>
+            <select class="u-full-width" id="packingType" v-model='packingType'>
                 <option value="random">Random</option>
                 <option value="cubic">Cubic</option>
                 <option value="hex">Hexagonal</option>
               </select>
-            </div>
-            <div class="six columns" v-if="uploadFile">
-              <label for="imageData">Data Type</label>
-              <select class="u-full-width" id="imageData" v-model='imageData' v-on:change="clearEverything">
+          </div>
+          <div class="six columns" v-if="uploadFile">
+            <label for="imageData">Data Type</label>
+            <select class="u-full-width" id="imageData" v-model='imageData' v-on:change="clearEverything">
                 <option value="CSVCenter">CSV (Center and Radius)</option>
                 <option value="CSVThree">CSV (Three Point)</option>
                 <option value="Image">Image</option>
               </select>
-            </div>
-            <div class="six columns" v-if="packingType == 'random' && !uploadFile">
-              <label for="smallFib">Smaller Fibres</label>
-              <input type="checkbox" id="smallFib" v-model='smallFib' style="zoom:2">
-            </div>
-            <div class="six columns" v-if="uploadFile">
-              <label for="csvData">{{ imageData }} File</label>
-              <input type="file" id="csvData" size="120" v-on:click="clearCSV" v-on:change="parseCSV" v-if="imageData != 'Image'">
-              <input type="file" id="imageUpload" size="120" v-on:change="handleImage" v-if="imageData == 'Image'">
-            </div>
+          </div>
+          <div class="six columns" v-if="packingType == 'random' && !uploadFile">
+            <label for="smallFib">Smaller Fibres</label>
+            <input type="checkbox" id="smallFib" v-model='smallFib' style="zoom:2">
+          </div>
+          <div class="six columns" v-if="uploadFile">
+            <label for="csvData">{{ imageData }} File</label>
+            <input type="file" id="csvData" size="120" v-on:click="clearCSV" v-on:change="parseCSV" v-if="imageData != 'Image'">
+            <input type="file" id="imageUpload" size="120" v-on:change="handleImage" v-if="imageData == 'Image'">
+          </div>
+        </div>
+
+        <h5 style="margin-left: 40%">Matrix Dimensions</h5>
+        <div class="row">
+          <div class="four columns">
+            <label for="breadthMatrix">Breadth</label>
+            <input type="number" id="breadthMatrix" min="0" step="any" v-model.number='breadthMatrix'>
+          </div>
+          <div class="four columns" v-if="packingType == 'random' || uploadFile">
+            <label for="lengthMatrix">Length</label>
+            <input type="number" id="lengthMatrix" min="0" step="any" v-model.number='lengthMatrix'>
+          </div>
+          <div class="four columns">
+            <label for="depthMatrix">Depth/Height</label>
+            <input type="number" id="depthMatrix" min="0" step="any" v-model.number='depthMatrix'>
+          </div>
+        </div>
+        <hr>
+
+        <div class="row">
+
+          <div class="six columns">
+            <label for="volumeFraction">Volume Fraction</label>
+            <input class="u-full-width" type="number" min="0" max="1" step="any" v-model.number='volumeFraction' placeholder="0.5" id="volumeFraction" required :disabled="uploadFile">
           </div>
 
-          <h5 style="margin-left: 40%">Matrix Dimensions</h5>
-          <div class="row">
-            <div class="four columns">
-              <label for="breadthMatrix">Breadth</label>
-              <input type="number" id="breadthMatrix" min="0" step="any" v-model='breadthMatrix'>
-            </div>
-            <div class="four columns" v-if="packingType == 'random' || uploadFile">
-              <label for="lengthMatrix">Length</label>
-              <input type="number" id="lengthMatrix" min="0" step="any" v-model='lengthMatrix'>
-            </div>
-            <div class="four columns">
-              <label for="depthMatrix">Depth/Height</label>
-              <input type="number" id="depthMatrix" min="0" step="any" v-model='depthMatrix'>
-            </div>
+          <div class="six columns">
+            <label for="numFibres">Number of Fibres</label>
+            <input class="u-full-width" type="number" min="0" v-model.number='numFibres' placeholder="20" id="numFibres" required :disabled="uploadFile">
           </div>
-          <hr>
+        </div>
 
-          <div class="row">
+        <hr>
 
-            <div class="six columns">
-              <label for="volumeFraction">Volume Fraction</label>
-              <input class="u-full-width" type="number" min="0" max="1" step="any" v-model='volumeFraction'
-              placeholder="0.5" id="volumeFraction" required :disabled="uploadFile">
-            </div>
+        <button type="button" style="margin-left: 40%" class="button-primary" v-if="!uploadFile" id="buttonCS" :onclick="'generate_' + packingType + '()'">Generate Cross Section</button>
+        <button type="button" style="margin-left: 40%" class="button-primary" v-if="uploadFile" id="buttonCS" :onclick="'generate_upload_' + imageData + '()'">Generate Cross Section</button>
+        <hr>
 
-            <div class="six columns">
-              <label for="numFibres">Number of Fibres</label>
-              <input class="u-full-width" type="number" min="0" v-model='numFibres' placeholder="20" id="numFibres"
-              required :disabled="uploadFile">
-            </div>
+        <div class="row">
+
+          <span style="margin-left: 20%; font-size: 3vh">Matrix</span>
+          <span style="margin-left: 40%; font-size: 3vh">Fibre</span>
+
+        </div>
+        <div class="row">
+
+          <div class="three columns">
+            <label for="matrixYM">Young's Modulus</label>
+            <input type="number" id="matrixYM" v-model.number='matrixYM' required>
+          </div>
+          <div class="three columns">
+            <label for="matrixPR">Poisson's Ratio</label>
+            <input type="number" min="0" max="1" step="any" id="matrixPR" v-model.number='matrixPR' required>
           </div>
 
-          <hr>
-
-          <button type="button" style="margin-left: 40%" class="button-primary" v-if="!uploadFile" id="buttonCS" :onclick="'generate_' + packingType + '()'">Generate Cross Section</button>
-          <button type="button" style="margin-left: 40%" class="button-primary" v-if="uploadFile" id="buttonCS" :onclick="'generate_upload_' + imageData + '()'">Generate Cross Section</button>
-          <hr>
-
-          <div class="row">
-
-            <span style="margin-left: 20%; font-size: 3vh">Matrix</span>
-            <span style="margin-left: 40%; font-size: 3vh">Fibre</span>
-
+          <div class="three columns">
+            <label for="fibreYM">Young's Modulus</label>
+            <input type="number" id="fibreYM" v-model.number='fibreYM' required>
           </div>
-          <div class="row">
-
-            <div class="three columns">
-              <label for="matrixYM">Young's Modulus</label>
-              <input type="number" id="matrixYM" v-model='matrixYM' required>
-            </div>
-            <div class="three columns">
-              <label for="matrixPR">Poisson's Ratio</label>
-              <input type="number" min="0" max="1" step="any" id="matrixPR" v-model='matrixPR' required>
-            </div>
-
-            <div class="three columns">
-              <label for="fibreYM">Young's Modulus</label>
-              <input type="number" id="fibreYM" v-model='fibreYM' required>
-            </div>
-            <div class="three columns">
-              <label for="fibrePR">Poisson's Ratio</label>
-              <input type="number" min="0" max="1" step="any" id="fibrePR" v-model='fibrePR' required>
-            </div>
+          <div class="three columns">
+            <label for="fibrePR">Poisson's Ratio</label>
+            <input type="number" min="0" max="1" step="any" id="fibrePR" v-model.number='fibrePR' required>
           </div>
-<!--         <div class="row">
+        </div>
+        <!--         <div class="row">
           <div class="six columns">
             <label for="elementType">Element Type</label>
             <select class="u-full-width" id="elementType" v-model='elementType'>
@@ -142,18 +142,28 @@
             </select>
           </div>
         </div>
- -->
+      -->
 
         <hr>
         <div class="row">
 
-          <div class="twelve columns">
+          <div class="six columns">
             <label for="meshSeed">Mesh Seed Size</label>
-            <input type="number" min="0" id="meshSeed" step="any" :max='10*padding' placeholder="0" v-model='meshSeed' required>
+            <input type="number" min="0" id="meshSeed" step="any" :max='10*padding' placeholder="0" v-model.number='meshSeed' required>
           </div>
+
+          <div class="six columns">
+            <label for="loadDir">Load Direction</label>
+            <select class="u-full-width" id="loadDir" v-on:change="loadChange" v-model='loadDir'>
+                <option value="x">X - Direction</option>
+                <option value="y">Y - Direction</option>
+                <option value="z">Z - Direction</option>
+              </select>
           </div>
-          <hr>
-<!-- 
+
+        </div>
+        <hr>
+        <!-- 
           <div class="six columns">
             <label for="loading">Loading</label>
             <select class="u-full-width" id="loading" v-model='loading'>
@@ -187,33 +197,35 @@
             <input type="checkbox" id="zComp-both">
           </div>
         </div> -->
-           
-      <div class="row">
-        <div class="six columns offset-by-three">
-          <label for="fileName">File Name</label>
-          <input class="u-full-width" type="text" value="sample.json"  id="fileName" v-model='fileName' required>
+
+        <div class="row">
+          <div class="six columns offset-by-three">
+            <label for="fileName">File Name</label>
+            <input class="u-full-width" type="text" value="sample.json" id="fileName" v-model='fileName' required>
+          </div>
         </div>
-      </div>
 
-      <button type="submit" style="margin-left: 40%" class="button-primary" >Generate File</button>
+        <button type="submit" style="margin-left: 40%" class="button-primary">Generate File</button>
 
-    </form>
+      </form>
+    </div>
   </div>
-</div>
 
-<script type="text/javascript" src='js/FileSaver.js'></script>
-<script type="text/javascript" src='js/mitchell.js'></script>
-<script type="text/javascript" src='js/script.js'></script>
-<script type="text/javascript" src='js/d3.v4.min.js'></script>
-<script type="text/javascript" src="js/d3-quadtree.v1.min.js"></script>
-<script type="text/javascript" src="js/three.js"></script>
-<script type="text/javascript" src="js/TrackballControls.js"></script>
-<script type="text/javascript" src='js/vue.min.js'></script>
-<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
-<script type="text/javascript" src="js/alertify.js"></script>
-<script type="text/javascript" src='js/toxiclibs.min.js'></script>
-<script type="text/javascript" src='js/papaparse.min.js'></script>
-<script type="text/javascript" src='js/abaqus.js'></script>
+  <script type="text/javascript" src='js/FileSaver.js'></script>
+  <script type="text/javascript" src='js/mitchell.js'></script>
+  <script type="text/javascript" src='js/script.js'></script>
+  <script type="text/javascript" src="js/load.js"></script>
+  <script type="text/javascript" src='js/d3.v4.min.js'></script>
+  <script type="text/javascript" src="js/d3-quadtree.v1.min.js"></script>
+  <script type="text/javascript" src="js/three.js"></script>
+  <script type="text/javascript" src="js/TrackballControls.js"></script>
+  <script type="text/javascript" src='js/vue.min.js'></script>
+  <script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="js/alertify.js"></script>
+  <script type="text/javascript" src='js/toxiclibs.min.js'></script>
+  <script type="text/javascript" src='js/papaparse.min.js'></script>
+  <script type="text/javascript" src='js/abaqus.js'></script>
 
 </body>
+
 </html>
