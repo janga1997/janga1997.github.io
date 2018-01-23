@@ -45,7 +45,7 @@ function handleLoad(centers, breadth, length, depth, direction) {
 
     if (current[0][comp] > current[0][2]) {
       dummy[index] = edge;
-      dummy[comp] = current[0][comp] / 2;
+      dummy[comp] = (current[0][comp] - current[0][2])/ 2;
       answer.push(['Matrix'].concat(dummy.slice()));
     }
 
@@ -69,7 +69,7 @@ function handleLoad(centers, breadth, length, depth, direction) {
     var max = current[current.length - 1];
     if (max[comp] < dims[comp] - max[2]) {
       dummy[index] = edge;
-      dummy[comp] = (max[comp] + dims[comp]) / 2;
+      dummy[comp] = (max[comp] + max[2] + dims[comp]) / 2;
       answer.push(['Matrix'].concat(dummy.slice()))
     }
   }

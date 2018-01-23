@@ -194,10 +194,11 @@ def automateMicro(data):
 
     # Load Application
 
-    point = masterOBJ['loadSurfaces'][0]
-    loadRegion = mdb.models['Model-1'].rootAssembly.instances[point[0] + '_instance'].faces.findAt((point[1:],),)
+    point = tuple(masterOBJ['loadSurfaces'][0])
+    loadRegion = mdb.models['Model-1'].rootAssembly.instances[str(point[0] + '_instance')].faces.findAt((point[1:],),)
     for point in masterOBJ['loadSurfaces'][1:]:
-        loadRegion += mdb.models['Model-1'].rootAssembly.instances[point[0] + '_instance'].faces.findAt((point[1:],),)
+        point = tuple(point)
+        loadRegion += mdb.models['Model-1'].rootAssembly.instances[str(point[0] + '_instance')].faces.findAt((point[1:],),)
 
     mdb.models['Model-1'].Pressure(amplitude=UNSET, createStepName='Step-1', 
         distributionType=UNIFORM, field='', magnitude=-1.0, name='Load-1', region=Region(side1Faces=loadRegion))
