@@ -17,7 +17,7 @@ function handleZAxis(centers, breadth, length, depth) {
     filtered = centers.filter(function(val) {
       return Math.pow(val[0] - randomPoint[1], 2) + Math.pow(val[1] - randomPoint[2], 2) <= Math.pow(val[2], 2); 
     });
-    if (filtered.length > 0) {
+    if (filtered.length == 0) {
       break;
     }
   }
