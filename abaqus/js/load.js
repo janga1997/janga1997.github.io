@@ -1,4 +1,43 @@
+function handleZAxis(centers, breadth, length, depth) {
+  var lower, upper;
+
+  lower = centers.map(function(val, index) {
+    return ['Fibre_' + index].concat(val.slice(0, -1).concat(0));
+  });
+
+  upper = centers.map(function(val, index) {
+    return ['Fibre_' + index].concat(val.slice(0, -1).concat(depth));
+  });
+
+  var randomPoint, filtered, num=0;
+
+  while (true){
+    num += 1;
+    randomPoint = ['Matrix', Math.random()*breadth, Math.random()*length, 0];
+    filtered = centers.filter(function(val) {
+      return Math.pow(val[0] - randomPoint[1], 2) + Math.pow(val[1] - randomPoint[2], 2) <= Math.pow(val[2], 2); 
+    });
+    if (filtered.length > 0) {
+      break;
+    }
+  }
+
+  var answer = lower.concat(upper);
+  answer.push(randomPoint.slice());
+
+  randomPoint[3] = depth;
+  answer.push(randomPoint.slice());
+
+  console.log('Number :' + num);
+  return answer;
+
+}
+
 function handleLoad(centers, breadth, length, depth, direction) {
+
+  if (direction == 'z') {
+    return handleZAxis(centers, breadth, length, depth);
+  }
 
   var axes = {
       'x': 0,
