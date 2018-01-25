@@ -152,7 +152,12 @@
             <input type="number" min="0" id="meshSeed" step="any" placeholder="0" v-model.number='meshSeed' required>
           </div>
 
-          <div class="six columns">
+          <div class="three columns">
+            <label for="loadMagnitude">Load Direction</label>
+            <input type="number" min="0" step="any" id="loadMagnitude" v-model.number='loadMagnitude' required>
+          </div>
+
+          <div class="three columns">
             <label for="loadDir">Load Direction</label>
             <select class="u-full-width" id="loadDir" v-on:change="loadChange" v-model='loadDir'>
                 <option value="x">X - Direction</option>

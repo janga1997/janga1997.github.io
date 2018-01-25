@@ -191,7 +191,6 @@ def automateMicro(data):
             mdb.models['Model-1'].rootAssembly.surfaces[matrix_surface], thickness=ON, 
             tieRotations=ON)
 
-
     # Load Application
 
     point = tuple(masterOBJ['loadSurfaces'][0])
@@ -201,7 +200,7 @@ def automateMicro(data):
         loadRegion += mdb.models['Model-1'].rootAssembly.instances[str(point[0] + '_instance')].faces.findAt((point[1:],),)
 
     mdb.models['Model-1'].Pressure(amplitude=UNSET, createStepName='Step-1', 
-        distributionType=UNIFORM, field='', magnitude=-1.0, name='Load-1', region=Region(side1Faces=loadRegion))
+        distributionType=UNIFORM, field='', magnitude=masterOBJ['loadMagnitude'], name='Load-1', region=Region(side1Faces=loadRegion))
 
     # mdb.models['Model-1'].rootAssembly.Surface(name='Surf-3', side1Faces=
     #     mdb.models['Model-1'].rootAssembly.instances['Matrix_instance'].faces.findAt(((0, length/2, height/2),),))

@@ -25,6 +25,7 @@ var masterObject = new Vue({
     matrixPR: 0.2,
     meshSeed: 2,
     loadDir: 'x',
+    loadMagnitude: 10,
     padding: Infinity,
     uploadFile: false,
     imageData: "Image",
