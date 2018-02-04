@@ -129,8 +129,8 @@
 
             <div class="row">
               <div class="four columns">
-                <label for="meshSeed">Mesh Seed Size</label>
-                <input type="number" min="0" id="meshSeed" step="any" placeholder="0" v-model.number="meshSeed" required>
+                <label for="meshSeed">Mesh Size < {{ (10*padding).toFixed(2) }}</label>
+                <input type="number" min="0" :max="10*padding" id="meshSeed" step="any" placeholder="0" v-model.number="meshSeed" required>
               </div>
 
               <div class="four columns">
@@ -176,7 +176,7 @@
     <script type="text/javascript" src="js/libs/toxiclibs.min.js"></script>
     <script type="text/javascript" src="js/libs/papaparse.min.js"></script>
 
-    <script type="text/javascript" src="js/script.js"></script>
+    <script type="text/javascript" src="js/custom/script.js"></script>
     <script type="text/javascript" src="js/mitchell.js"></script>
     <script type="text/javascript" src="js/load.js"></script>
     <script type="text/javascript" src="js/abaqus.js"></script>

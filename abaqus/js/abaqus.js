@@ -142,7 +142,7 @@ function generate_random() {
 
   var maxRadius = Math.sqrt(volumeFraction * height * width / (Math.PI * numFibres));
   var minRadius = maxRadius;
-  var newCircle = bestCircleGenerator(1.1 * maxRadius, 0.1 * maxRadius, width, height);
+  var newCircle = bestCircleGenerator(1.05 * maxRadius, 0.05 * maxRadius, width, height);
 
   masterObject.padding = 0.1 * maxRadius;
 
