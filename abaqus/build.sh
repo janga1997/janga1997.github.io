@@ -8,3 +8,5 @@ do
    uglifyjs "js/$i.js" > "$directory$i.min.js"
    # or do whatever with individual element of the array
 done
+
+uglifyjs "test.html" > "index.html"

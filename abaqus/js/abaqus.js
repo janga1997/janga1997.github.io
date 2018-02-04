@@ -1,5 +1,5 @@
 var timer;
-var animationId;
+var animationId, scene;
 var d3Timer;
 var tempCircle = [];
 var interval;
@@ -151,7 +151,7 @@ function generate_random() {
   var k = 10, // initial number of candidates to consider per circle
     m = 10;
 
-  var scene = add_scene();
+  scene = add_scene();
   add_cube(scene);
 
   var count = 0;
@@ -205,7 +205,7 @@ function generate_random() {
       alertify.log(logMsg.outerHTML + bottom.outerHTML);
 
       document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5) +
-        "\nMaximum Radius: " + maxRadius.toFixed(5);
+        "::Maximum Radius: " + maxRadius.toFixed(5);
 
       masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, vertical, masterObject.loadDir);
 
@@ -368,7 +368,7 @@ function generate_cubic() {
   var height = masterObject.lengthMatrix = ratio * width;
   var radius = Math.sqrt(volumeFraction * height * width / (Math.PI * numFibres));
 
-  var scene = add_scene();
+  scene = add_scene();
   add_cube(scene);
 
   var unit = Math.sqrt(width * height / numFibres);
@@ -421,7 +421,7 @@ function generate_hex() {
 
   masterObject.padding = maxRadius - radius;
 
-  var scene = add_scene();
+  scene = add_scene();
   add_cube(scene);
 
   var unit = Math.sqrt(width * height / numFibres);
@@ -481,7 +481,7 @@ function generate_upload_Image() {
   clearInterval(interval);
   $(document).off('keydown');
 
-  var scene = add_scene();
+  scene = add_scene();
   add_cube(scene);
 
   masterObject.generatedCenters = [];
@@ -504,7 +504,7 @@ function generate_upload_Image() {
 
 function generate_upload_CSVCenter() {
 
-  var scene = add_scene();
+  scene = add_scene();
   add_cube(scene);
 
   masterObject.generatedCenters = [];
@@ -529,7 +529,7 @@ function generate_upload_CSVThree() {
   var height = masterObject.lengthMatrix;
   var width = masterObject.breadthMatrix
 
-  var scene = add_scene();
+  scene = add_scene();
   add_cube(scene);
 
   masterObject.generatedCenters = [];
@@ -601,8 +601,8 @@ function add_scene() {
 
   var container = document.getElementById('svgCS');
 
-  var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.6, 5000);
+  scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(75, (container.clientWidth/1.1) / (window.innerHeight/1.2), 0.6, 5000);
 
   var cameraPos = Math.max(length, breadth, depth);
   cameraPos = 1.5 * cameraPos;
@@ -610,7 +610,7 @@ function add_scene() {
   camera.lookAt(breadth / 2, length / 2, depth / 2); // or the origin
 
   var renderer = new THREE.WebGLRenderer();
-  renderer.setSize(window.innerWidth / 1.5, window.innerHeight / 1.5);
+  renderer.setSize(container.clientWidth/1.1, window.innerHeight/1.2);
   container.appendChild(renderer.domElement);
 
   var controls = new THREE.TrackballControls(camera, renderer.domElement);
@@ -663,6 +663,7 @@ function add_cube(scene) {
   }));
   scene.add(line);
   var cube = new THREE.Mesh(geometry, material);
+  cube.name = 'Matrix';
   scene.add(cube);
 
   line.position.set(breadth / 2, length / 2, depth / 2);
@@ -683,7 +684,6 @@ function add_fibre(scene, x, y, radius) {
   scene.add(small);
 
   small.position.set(x, y, depth / 2);
-
   small.rotation.x = 0.5 * Math.PI;
 }
 
