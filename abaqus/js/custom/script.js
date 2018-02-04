@@ -223,8 +223,8 @@ def automateMicro(data):
 
     meshSize = masterOBJ['meshSeed']
     meshSize = float(meshSize)
-    mdb.models['Model-1'].rootAssembly.seedPartInstance(deviationFactor=0.01, 
-        minSizeFactor=0.5, regions=instances, size=meshSize)
+    mdb.models['Model-1'].rootAssembly.seedPartInstance(deviationFactor=0.1,
+        minSizeFactor=0.1, regions=instances, size=meshSize)
 
     mdb.models['Model-1'].rootAssembly.generateMesh(regions=instances)
 
