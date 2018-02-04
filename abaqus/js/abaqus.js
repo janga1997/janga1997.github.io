@@ -4,7 +4,6 @@ var d3Timer;
 var tempCircle = [];
 var interval;
 
-
 var masterObject = new Vue({
   el: "#masterAbaqus",
   data: {
@@ -675,24 +674,17 @@ function add_fibre(scene, x, y, radius) {
   var depth = Number(masterObject.depthMatrix);
 
   // console.log(depth + 1);
-  geometry = new THREE.CylinderGeometry(radius, radius, 1.01 * depth, 20);
-  material = new THREE.MeshBasicMaterial({
+  var geometry = new THREE.CylinderGeometry(radius, radius, 1.01 * depth, 20);
+  var material = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     opacity: 0
   });
   var small = new THREE.Mesh(geometry, material);
-  var edges = new THREE.EdgesGeometry(geometry);
-  var line1 = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
-    color: 0
-  }));
-  scene.add(line1);
   scene.add(small);
 
   small.position.set(x, y, depth / 2);
-  line1.position.set(x, y, depth / 2);
 
   small.rotation.x = 0.5 * Math.PI;
-  line1.rotation.x = 0.5 * Math.PI;
 }
 
 function getFile() {
