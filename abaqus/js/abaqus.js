@@ -2,7 +2,7 @@ var timer;
 var animationId, scene, masterGeom, masterMat = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     opacity: 0
-  }), arrowHelper;
+  }), arrowHelpers;
 var d3Timer;
 var tempCircle = [];
 var interval;
@@ -694,7 +694,9 @@ function add_cube(scene) {
   line.position.set(breadth / 2, length / 2, depth / 2);
   cube.position.set(breadth / 2, length / 2, depth / 2);
 
-  scene.add( add_arrow(breadth, length, depth) );
+  add_arrow(breadth, length, depth).forEach(function(element) {
+    scene.add(element);
+  });
 
 }
 
@@ -708,9 +710,13 @@ function add_arrow(breadth, length, depth) {
   dirVec[dir[masterObject.loadDir]] = 1;
   origin[dir[masterObject.loadDir]] *= 2;
 
-  arrowHelper = new THREE.ArrowHelper( new THREE.Vector3( ...dirVec ), new THREE.Vector3( ...origin ), length, hex , length/2, length/3);
+  arrowHelpers = [new THREE.ArrowHelper( new THREE.Vector3( ...dirVec ), new THREE.Vector3( ...origin ), length, hex , length/2, length/3)];
 
-  return arrowHelper;
+  dirVec[dir[masterObject.loadDir]] = -1;
+  origin[dir[masterObject.loadDir]] *= 0;
+  arrowHelpers.push(new THREE.ArrowHelper( new THREE.Vector3( ...dirVec ), new THREE.Vector3( ...origin ), length, hex , length/2, length/3))
+
+  return arrowHelpers;
 
 }
 
@@ -736,8 +742,14 @@ function change_arrow(breadth, length, depth) {
   dirVec[dir[masterObject.loadDir]] = 1;
   origin[dir[masterObject.loadDir]] *= 2;
 
-  arrowHelper.position.fromArray(origin);
-  arrowHelper.setDirection(new THREE.Vector3( ...dirVec ));
+  arrowHelpers[0].position.fromArray(origin);
+  arrowHelpers[0].setDirection(new THREE.Vector3( ...dirVec ));
+
+  dirVec[dir[masterObject.loadDir]] = -1;
+  origin[dir[masterObject.loadDir]] *= 0;
+
+  arrowHelpers[1].position.fromArray(origin);
+  arrowHelpers[1].setDirection(new THREE.Vector3( ...dirVec ));
 
 }
 
