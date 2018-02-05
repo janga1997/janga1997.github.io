@@ -1,5 +1,8 @@
 var timer;
-var animationId, scene;
+var animationId, scene, masterGeom, masterMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    opacity: 0
+  });
 var d3Timer;
 var tempCircle = [];
 var interval;
@@ -152,6 +155,7 @@ function generate_random() {
     m = 10;
 
   scene = add_scene();
+  masterGeom = new THREE.Geometry();
   add_cube(scene);
 
   var count = 0;
@@ -187,7 +191,7 @@ function generate_random() {
 
       minRadius = Math.min(minRadius, circle[2]);
 
-      add_fibre(scene, circle[0], circle[1], circle[2]);
+      masterGeom.merge( ...add_fibre(circle[0], circle[1], circle[2]) );
 
       // As we add more circles, generate more candidates per circle.
       // Since this takes more effort, gradually reduce circles per frame.
@@ -203,6 +207,8 @@ function generate_random() {
       var bottom = document.createElement('h5');
       bottom.innerHTML = "greater than required volume fraction";
       alertify.log(logMsg.outerHTML + bottom.outerHTML);
+
+      scene.add(new THREE.Mesh(masterGeom, masterMat));
 
       document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5) +
         "::Maximum Radius: " + maxRadius.toFixed(5);
@@ -222,6 +228,8 @@ function generate_random() {
 
       document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5) +
         "\nMaximum Radius: " + maxRadius.toFixed(5);
+
+      scene.add(new THREE.Mesh(masterGeom, masterMat));
 
       masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, vertical, masterObject.loadDir);
 
@@ -369,6 +377,7 @@ function generate_cubic() {
   var radius = Math.sqrt(volumeFraction * height * width / (Math.PI * numFibres));
 
   scene = add_scene();
+  masterGeom = new THREE.Geometry();
   add_cube(scene);
 
   var unit = Math.sqrt(width * height / numFibres);
@@ -381,10 +390,11 @@ function generate_cubic() {
       var center = [(i + 0.5) * unit, (j + 0.5) * unit];
       masterObject.generatedCenters.push([center[1], center[0], radius]);
 
-      add_fibre(scene, center[1], center[0], radius);
+      masterGeom.merge( ...add_fibre(center[1], center[0], radius));
     }
   }
 
+  scene.add(new THREE.Mesh(masterGeom, masterMat));
   masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, depth, masterObject.loadDir);
 
 }
@@ -422,6 +432,7 @@ function generate_hex() {
   masterObject.padding = maxRadius - radius;
 
   scene = add_scene();
+  masterGeom = new THREE.Geometry();
   add_cube(scene);
 
   var unit = Math.sqrt(width * height / numFibres);
@@ -432,10 +443,11 @@ function generate_hex() {
       var center = [maxRadius * ((i + 1) % 2) + j * 2 * maxRadius, maxRadius + i * maxRadius * Math.sqrt(3)];
       masterObject.generatedCenters.push([center[0], center[1], radius]);
 
-      add_fibre(scene, center[0], center[1], radius);
+      masterGeom.merge( ...add_fibre(center[0], center[1], radius));
     }
   }
 
+  scene.add(new THREE.Mesh(masterGeom, masterMat));
   masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, depth, masterObject.loadDir);
 }
 
@@ -482,6 +494,7 @@ function generate_upload_Image() {
   $(document).off('keydown');
 
   scene = add_scene();
+  masterGeom = new THREE.Geometry();
   add_cube(scene);
 
   masterObject.generatedCenters = [];
@@ -495,9 +508,10 @@ function generate_upload_Image() {
     fibreArea += Math.PI * radius * radius;
 
     masterObject.generatedCenters.push([row.x, row.y, radius]);
-    add_fibre(scene, row.x, row.y, radius);
+    masterGeom.merge( ...add_fibre(row.x, row.y, radius));
   }
 
+  scene.add(new THREE.Mesh(masterGeom, masterMat));
   masterObject.volumeFraction = fibreArea / (masterObject.breadthMatrix * masterObject.lengthMatrix);
 
 }
@@ -505,6 +519,7 @@ function generate_upload_Image() {
 function generate_upload_CSVCenter() {
 
   scene = add_scene();
+  masterGeom = new THREE.Geometry();
   add_cube(scene);
 
   masterObject.generatedCenters = [];
@@ -517,8 +532,11 @@ function generate_upload_CSVCenter() {
 
     //Drawing a circle
     masterObject.generatedCenters.push([row[1], row[2], row[0]]);
-    add_fibre(scene, row[1], row[2], row[0]);
+    masterGeom.merge( ...add_fibre(row[1], row[2], row[0]));
   }
+
+  scene.add(new THREE.Mesh(masterGeom, masterMat));
+
 }
 
 function generate_upload_CSVThree() {
@@ -530,6 +548,7 @@ function generate_upload_CSVThree() {
   var width = masterObject.breadthMatrix
 
   scene = add_scene();
+  masterGeom = new THREE.Geometry();
   add_cube(scene);
 
   masterObject.generatedCenters = [];
@@ -545,8 +564,11 @@ function generate_upload_CSVThree() {
 
     //Drawing a circle
     masterObject.generatedCenters.push([circle.x, circle.y, circle.getRadius()]);
-    add_fibre(scene, circle.x, circle.y, circle.getRadius());
+    masterGeom.merge( ...add_fibre(circle.x, circle.y, circle.getRadius()));
   }
+
+  scene.add(new THREE.Mesh(masterGeom, masterMat));
+
 }
 
 function alertAbaqus() {
@@ -616,7 +638,7 @@ function add_scene() {
   var controls = new THREE.TrackballControls(camera, renderer.domElement);
   controls.target.set(breadth / 2, length / 2, depth / 2);
 
-  controls.rotateSpeed = 2.0;
+  controls.rotateSpeed = 0.5;
 
 
   var animate = function() {
@@ -670,37 +692,22 @@ function add_cube(scene) {
   cube.position.set(breadth / 2, length / 2, depth / 2);
 }
 
-function add_fibre(scene, x, y, radius) {
+function add_fibre(x, y, radius) {
 
   var depth = Number(masterObject.depthMatrix);
 
-  // console.log(depth + 1);
   var geometry = new THREE.CylinderGeometry(radius, radius, 1.01 * depth, 20);
-  var material = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
-    opacity: 0
-  });
-  var small = new THREE.Mesh(geometry, material);
-  scene.add(small);
+  var matrix = new THREE.Matrix4();
+  matrix.makeRotationX( Math.PI/2 ).setPosition(new THREE.Vector3( x, y, depth/2 ));
 
-  small.position.set(x, y, depth / 2);
-  small.rotation.x = 0.5 * Math.PI;
+  return [geometry, matrix];
+
 }
 
 function getFile() {
   var fileObject = {};
 
   fileObject = masterObject.$data;
-
-  // fileObject.components = [];
-  // fileObject.directions = [];
-
-  // var comps = ['x', 'y', 'z'];
-
-  // for(s of comps){
-  //   fileObject.components.push(Number(document.getElementById(s + 'Comp').checked));
-  //   fileObject.directions.push(Number(document.getElementById(s + 'Comp-both').checked))
-  // }
 
   fileObject = "data = '" + JSON.stringify(fileObject) + "'";
 
