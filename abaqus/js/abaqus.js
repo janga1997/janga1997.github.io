@@ -2,7 +2,7 @@ var timer;
 var animationId, scene, masterGeom, masterMat = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     opacity: 0
-  });
+  }), arrowHelper;
 var d3Timer;
 var tempCircle = [];
 var interval;
@@ -128,6 +128,9 @@ var masterObject = new Vue({
       }
 
       masterObject.loadSurfaces = handleLoad(centers, breadth, length, depth, masterObject.loadDir);
+
+      change_arrow(breadth, length, depth);
+
     }
 
   }
@@ -690,6 +693,25 @@ function add_cube(scene) {
 
   line.position.set(breadth / 2, length / 2, depth / 2);
   cube.position.set(breadth / 2, length / 2, depth / 2);
+
+  scene.add( add_arrow(breadth, length, depth) );
+
+}
+
+function add_arrow(breadth, length, depth) {
+
+  var origin = [ breadth/2, length/2, depth/2 ];
+  var length = Math.max(breadth, length, depth) / 2;
+  var hex = 0xffff00;
+  var dir = {'x':0, 'y':1, 'z':2};
+  var dirVec = [0, 0, 0];
+  dirVec[dir[masterObject.loadDir]] = 1;
+  origin[dir[masterObject.loadDir]] *= 2;
+
+  arrowHelper = new THREE.ArrowHelper( new THREE.Vector3( ...dirVec ), new THREE.Vector3( ...origin ), length, hex , length/2, length/3);
+
+  return arrowHelper;
+
 }
 
 function add_fibre(x, y, radius) {
@@ -701,6 +723,21 @@ function add_fibre(x, y, radius) {
   matrix.makeRotationX( Math.PI/2 ).setPosition(new THREE.Vector3( x, y, depth/2 ));
 
   return [geometry, matrix];
+
+}
+
+function change_arrow(breadth, length, depth) {
+
+  var origin = [ breadth/2, length/2, depth/2 ];
+  var length = Math.max(breadth, length, depth) / 2;
+  var hex = 0xffff00;
+  var dir = {'x':0, 'y':1, 'z':2};
+  var dirVec = [0, 0, 0];
+  dirVec[dir[masterObject.loadDir]] = 1;
+  origin[dir[masterObject.loadDir]] *= 2;
+
+  arrowHelper.position.fromArray(origin);
+  arrowHelper.setDirection(new THREE.Vector3( ...dirVec ));
 
 }
 
