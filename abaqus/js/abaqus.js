@@ -2,7 +2,7 @@ var timer;
 var animationId, scene, masterGeom, masterMat = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     opacity: 0
-  }), arrowHelpers;
+  }), arrowHelpers, mitchellWorker;
 var d3Timer;
 var tempCircle = [];
 var interval;
@@ -131,11 +131,18 @@ var masterObject = new Vue({
 
       change_arrow(breadth, length, depth);
 
-    }
+    },
 
   }
 });
 
+killWorker = function () {
+  if (typeof(mitchellWorker) != 'undefined') {
+    console.log('Worker Stopper');
+    mitchellWorker.terminate();
+    mitchellWorker = undefined;
+  }
+}
 
 function generate_random() {
   var completed = false;
@@ -148,206 +155,47 @@ function generate_random() {
 
   var maxRadius = Math.sqrt(volumeFraction * height * width / (Math.PI * numFibres));
   var minRadius = maxRadius;
-  var newCircle = bestCircleGenerator(1.05 * maxRadius, 0.05 * maxRadius, width, height);
 
   masterObject.padding = 0.1 * maxRadius;
 
   var fibreArea = volumeFraction * (width) * (height);
 
-  var k = 10, // initial number of candidates to consider per circle
-    m = 10;
+  if (typeof(mitchellWorker) != 'undefined') {
+    mitchellWorker.terminate();
+    mitchellWorker = undefined;
+  }
 
   scene = add_scene();
   masterGeom = new THREE.Geometry();
   add_cube(scene);
 
-  var count = 0;
-
-  var generatedArea = 0;
-  var tempArea = 0;
   masterObject.generatedCenters = [];
 
-  if (d3Timer) {
-    d3Timer.stop();
-  }
+  mitchellWorker = new Worker('js/worker.js');
+  mitchellWorker.postMessage([maxRadius, width, height, fibreArea, masterObject.smallFib]);
 
-  d3Timer = d3.timer(function() {
-    for (var i = 0; i < m && fibreArea > generatedArea; ++i) {
-      var circle = newCircle(k);
+  mitchellWorker.onmessage = function(event) {
+    var circle = event.data[0];
 
-      if (!masterObject.smallFib) {
-        if (circle[2] < maxRadius) {
-          // console.log('Smaller fibres eliminated');
-          completed = true;
-          continue;
-        }
-      }
+    document.getElementById('minRadius').innerText = (100 * event.data[1]).toFixed(2);
 
-      masterObject.generatedCenters.push([circle[0], circle[1], circle[2]]);
+    if (circle == 'finished') {
+      scene.add(new THREE.Mesh(masterGeom, masterMat));
+      document.getElementById('minRadius').innerText = event.data[2];
+      masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, vertical, masterObject.loadDir);
 
-      tempArea = removeArea(circle, width, height);
-      // console.log(tempArea/(Math.PI * circle[2] * circle[2]) + ', ' + tempArea);
-      // console.log(circle);
-      // console.log('----------------------------');
-      generatedArea += tempArea;
-      count++;
-
-      minRadius = Math.min(minRadius, circle[2]);
-
-      masterGeom.merge( ...add_fibre(circle[0], circle[1], circle[2]) );
-
-      // As we add more circles, generate more candidates per circle.
-      // Since this takes more effort, gradually reduce circles per frame.
-      // if (k < 500) k *= maxRadius/circle[2], m *= 2;
-
-      k = 10 * masterObject.generatedCenters.length;
-    }
-
-    if (completed) {
-      var error = ((generatedArea - fibreArea) * (100 / fibreArea)).toFixed(3);
+      var error = ((event.data[1] - 1)*100).toFixed(3);
       var logMsg = document.createElement('h1');
       logMsg.innerHTML = "Error: " + error + "%";
       var bottom = document.createElement('h5');
       bottom.innerHTML = "greater than required volume fraction";
       alertify.log(logMsg.outerHTML + bottom.outerHTML);
 
-      scene.add(new THREE.Mesh(masterGeom, masterMat));
-
-      document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5) +
-        "::Maximum Radius: " + maxRadius.toFixed(5);
-
-      masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, vertical, masterObject.loadDir);
-
-      d3Timer.stop();
     }
 
-    if (fibreArea <= generatedArea) {
-      var error = ((generatedArea - fibreArea) * (100 / fibreArea)).toFixed(3);
-      var logMsg = document.createElement('h1');
-      logMsg.innerHTML = "Error: " + error + "%";
-      var bottom = document.createElement('h5');
-      bottom.innerHTML = "greater than required volume fraction";
-      alertify.log(logMsg.outerHTML + bottom.outerHTML);
-
-      document.getElementById('minRadius').innerText = "Minimum Radius: " + minRadius.toFixed(5) +
-        "\nMaximum Radius: " + maxRadius.toFixed(5);
-
-      scene.add(new THREE.Mesh(masterGeom, masterMat));
-
-      masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, vertical, masterObject.loadDir);
-
-      d3Timer.stop();
-    }
-
-  });
-
-  function bestCircleGenerator(maxRadius, padding, width, height) {
-    var quadtree = d3.quadtree().extent([
-        [0, 0],
-        [width, height]
-      ]),
-      searchRadius = maxRadius * 2,
-      maxRadius2 = maxRadius * maxRadius;
-
-    return function(k) {
-      var bestX, bestY, bestDistance = 0;
-
-      for (var i = 0; i < k || bestDistance < padding; ++i) {
-        var x = Math.random() * width,
-          y = Math.random() * height,
-          rx1 = x - searchRadius,
-          rx2 = x + searchRadius,
-          ry1 = y - searchRadius,
-          ry2 = y + searchRadius,
-          minDistance = maxRadius; // minimum distance for this candidate
-
-        quadtree.visit(function(quad, x1, y1, x2, y2) {
-          if (p = quad.data) {
-            var p,
-              dx = x - p[0],
-              dy = y - p[1],
-              d2 = dx * dx + dy * dy,
-              r2 = p[2] * p[2];
-            if (d2 < r2) return minDistance = 0, true; // within a circle
-            var d = Math.sqrt(d2) - p[2];
-            if (d < minDistance) minDistance = d;
-          }
-          return !minDistance || x1 > rx2 || x2 < rx1 || y1 > ry2 || y2 < ry1; // or outside search radius
-        });
-
-        if (minDistance > bestDistance) bestX = x, bestY = y, bestDistance = minDistance;
-      }
-
-      var best = [bestX, bestY, bestDistance - padding];
-      quadtree.add(best);
-      return best;
-    };
-  }
-
-}
-
-function removeArea(circle, width, height) {
-  var x = circle[0],
-    y = circle[1],
-    radius = circle[2],
-    theta, dist, area,
-    already = false;
-
-  if (x > width - radius) {
-    dist = width - x;
-    already = true;
-  } else if (x < radius) {
-    dist = x;
-    already = true;
-  }
-
-  if (y > height - radius) {
-    dist = height - y;
-
-    if (already) {
-      return approxArea(circle, width, height);
-    }
-  } else if (y < radius) {
-    dist = y;
-
-    if (already) {
-      return approxArea(circle, width, height);
-    }
-  } else if (x > radius && x < width - radius && y > radius && y < height - radius) {
-    area = Math.PI * radius * radius;
-    return area;
-  }
-
-  theta = Math.acos(dist / radius);
-
-  area = ((Math.PI - theta) * radius * radius) + dist * Math.sqrt(radius * radius - dist * dist);
-  return area;
-
-  function approxArea(circle, width, height) {
-    var randomPoints = [];
-
-    for (var i = 0; i <= width; i++) {
-      for (var j = 0; j <= height; j++) {
-        randomPoints.push([i, j]);
-      }
-    }
-
-    for (var i = 0.5; i < width; i += 0.5) {
-      for (var j = 0.5; j < height; j += 0.5) {
-        randomPoints.push([i, j]);
-      }
-    }
-
-    var inPoints = randomPoints.filter(function(point) {
-      var dx = point[0] - circle[0],
-        dy = point[1] - circle[1];
-
-      return Math.sqrt(dx * dx + dy * dy) <= circle[2];
-    });
-
-    return width * height * inPoints.length / randomPoints.length;
-
-  }
+    masterObject.generatedCenters.push([circle[0], circle[1], circle[2]]);
+    masterGeom.merge( ...add_fibre(circle[0], circle[1], circle[2]) );
+  };
 
 }
 
@@ -388,6 +236,7 @@ function generate_cubic() {
   masterObject.padding = (unit / 2) - radius;
 
   masterObject.generatedCenters = [];
+
   for (var i = 0; i < dimensions[1]; i++) {
     for (var j = 0; j < dimensions[0]; j++) {
       var center = [(i + 0.5) * unit, (j + 0.5) * unit];

@@ -94,9 +94,9 @@
               </div>
             </div>
 
-
             <button type="button" style="margin-left: 30%" class="button-primary" v-if="!uploadFile" id="buttonCS" :onclick="'generate_' + packingType + '()'">Generate Cross Section</button>
-            <button type="button" style="margin-left: 30%" class="button-primary" v-if="uploadFile" id="buttonCS" :onclick="'generate_upload_' + imageData + '()'">Generate Cross Section</button>
+            <button type="button" style="margin-left: 30%" class="button-primary" v-if="uploadFile" :onclick="'generate_upload_' + imageData + '()'">Generate Cross Section</button>
+            <button type="button" style="margin-left: 30%" class="button-primary" v-if="!uploadFile & packingType == 'random'" id="kill" onclick="killWorker()">Stop Process</button>
 
             <hr>
 
@@ -177,7 +177,6 @@
     <script type="text/javascript" src="js/libs/papaparse.min.js"></script>
 
     <script type="text/javascript" src="js/custom/script.js"></script>
-    <script type="text/javascript" src="js/mitchell.js"></script>
     <script type="text/javascript" src="js/load.js"></script>
     <script type="text/javascript" src="js/abaqus.js"></script>
 
