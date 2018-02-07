@@ -160,11 +160,6 @@ function generate_random() {
 
   var fibreArea = volumeFraction * (width) * (height);
 
-  if (typeof(mitchellWorker) != 'undefined') {
-    mitchellWorker.terminate();
-    mitchellWorker = undefined;
-  }
-
   scene = add_scene();
   masterGeom = new THREE.Geometry();
   add_cube(scene);
@@ -467,6 +462,12 @@ function parse_csv(file) {
 }
 
 function add_scene() {
+
+  if (typeof(mitchellWorker) != 'undefined') {
+    mitchellWorker.terminate();
+    mitchellWorker = undefined;
+  }
+
   var length = masterObject.lengthMatrix,
     breadth = masterObject.breadthMatrix,
     depth = masterObject.depthMatrix;
