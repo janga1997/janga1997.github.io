@@ -38,6 +38,8 @@ function mitchell(fibreArea, width, height, maxRadius, smallFib) {
   var message = "Minimum Radius: " + minRadius.toFixed(5) + " |||| Maximum Radius: " + maxRadius.toFixed(5);
   postMessage(['finished', generatedArea/fibreArea, message])
 
+  close();
+
 }
 
 function bestCircleGenerator(maxRadius, padding, width, height) {
