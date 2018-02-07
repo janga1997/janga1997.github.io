@@ -187,9 +187,10 @@ function generate_random() {
       alertify.log(logMsg.outerHTML + bottom.outerHTML);
 
     }
-
-    masterObject.generatedCenters.push([circle[0], circle[1], circle[2]]);
-    masterGeom.merge( ...add_fibre(circle[0], circle[1], circle[2]) );
+    else {
+      masterObject.generatedCenters.push([circle[0], circle[1], circle[2]]);
+      masterGeom.merge( ...add_fibre(circle[0], circle[1], circle[2]) );
+    }
   };
 
 }
