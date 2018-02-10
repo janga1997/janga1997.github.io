@@ -7,19 +7,34 @@ var d3Timer;
 var tempCircle = [];
 var interval;
 
+var params = {'volumeFraction': 1, 'numFibres': 100};
+
 var masterObject = new Vue({
   el: "#masterAbaqus",
   data: {
     packingType: "random",
+    simParam: "numFibres",
     smallFib: true,
     lengthMatrix: 100,
     breadthMatrix: 100,
     depthMatrix: 100,
     generatedCenters: [],
+    paramValues: [],
+    currentIteration: 1,
+    columns: [],
     loadSurfaces: [],
     csvCircles: [],
     imageCircles: [],
     volumeFraction: 0.3,
+
+    startVal: 20,
+    endVal: 50,
+    stepVal: 5,
+    numSamples: 5,
+    currentSample: 1,
+    currentValues: new Array(5).fill(0),
+    csvText: '',
+
     numFibres: 50,
     fibreYM: 72000,
     fibrePR: 0.2,
@@ -28,12 +43,20 @@ var masterObject = new Vue({
     meshSeed: 2,
     loadDir: 'x',
     loadMagnitude: 10,
+    error: 0,
     padding: Infinity,
     uploadFile: false,
+    simulation: true,
     imageData: "Image",
     fileName: "sample.py"
   },
   methods: {
+    paramChange: function () {
+      this.startVal = 0.2*params[this.simParam];
+      this.endVal = 0.5*params[this.simParam];
+      this.stepVal = 0.05*params[this.simParam];      
+    },
+
     parseCSV: function(event) {
       parse_csv(event.target.files[0]);
     },
@@ -49,7 +72,6 @@ var masterObject = new Vue({
         document.getElementById('imageUpload').value = null;
       }
 
-      console.log('Cleared interval');
       clearInterval(interval);
       $(document).off('keydown');
       masterObject.imageCircles = [];
@@ -85,14 +107,11 @@ var masterObject = new Vue({
       $(document).keydown(function(e) {
         if (e.which === 90 && e.ctrlKey) {
           masterObject.imageCircles = masterObject.imageCircles.slice(0, -1);
-          console.log('Key Pressed');
 
         }
       });
 
       interval = setInterval(function() {
-
-        console.log('Janga Redyd');
 
         context.fillRect(0, 0, canvas.width, canvas.height);
         context.drawImage(mapSprite, 0, 0, mapSprite.width, mapSprite.height);
@@ -136,15 +155,99 @@ var masterObject = new Vue({
   }
 });
 
+selectCSV = function() {
+  console.log('Clciked');
+  document.getElementById('csvText').select();
+  document.execCommand('Copy');
+}
+
 killWorker = function () {
   if (typeof(mitchellWorker) != 'undefined') {
-    console.log('Worker Stopper');
     mitchellWorker.terminate();
     mitchellWorker = undefined;
   }
 }
 
-function generate_random() {
+function generate_simulation() {
+
+  masterObject[masterObject.simParam] = masterObject.startVal;
+  masterObject.currentIteration = 1;
+
+  document.getElementById('svgCS').innerHTML = '';
+
+  var table = document.createElement('table');
+  table.id = "results_table";
+  table.append(document.createElement('thead'));
+  table.children[0].append(document.createElement('tr'));
+  table.append(document.createElement('tbody'));
+
+  masterObject.columns = ['NumberFibres', 'Vol.Fraction', 'Error', 'SmallFibre', 'LargeFibre'];
+
+  masterObject.columns.forEach(function (item) {
+    var dummy = document.createElement('th');
+    dummy.innerText = item;
+    table.children[0].children[0].append(dummy);
+  });
+
+  masterObject.csvText = masterObject.columns.reduce( (prev, curr) => prev + ',' + curr ) +'\n';
+
+  document.getElementById('svgCS').append(table);
+
+  masterObject.paramValues = [];
+  param_step();
+}
+
+function param_step() {
+
+  if (masterObject[masterObject.simParam] <= masterObject.endVal) {
+
+    masterObject.currentSample = 1;
+    masterObject.currentValues = new Array(5).fill(0);
+    current_step();
+
+  }
+}
+
+function param_results(testCallback) {
+
+  var row = document.createElement('tr');
+
+  masterObject.currentValues = masterObject.currentValues.map( (item) => (item/masterObject.numSamples).toFixed(4) );
+
+  masterObject.csvText += masterObject.currentValues.reduce( (prev, curr) => (prev + ',' + curr) ) + '\n';
+
+  masterObject.currentValues.forEach(function (item) {
+    var dummy = document.createElement('td');
+    dummy.innerText = item;
+    row.append(dummy);
+  });
+
+  document.getElementById('results_table').children[1].append(row);
+
+  masterObject[masterObject.simParam] += masterObject.stepVal;
+  masterObject.currentIteration += 1;
+  testCallback();
+}
+
+function current_step() {
+
+  if (masterObject.currentSample <= masterObject.numSamples) {
+    generate_random(current_results);
+  }
+
+  else {
+    masterObject.paramValues.push(masterObject.currentValues.map(x => x / masterObject.numSamples));
+    param_results(param_step);
+  }
+}
+
+function current_results(testCallback) {
+
+  masterObject.currentSample += 1;
+  testCallback();
+}
+
+function generate_random(testCallback) {
   var completed = false;
   var height = masterObject.lengthMatrix;
   var width = masterObject.breadthMatrix;
@@ -160,7 +263,7 @@ function generate_random() {
 
   var fibreArea = volumeFraction * (width) * (height);
 
-  scene = add_scene();
+  // scene = add_scene();
   masterGeom = new THREE.Geometry();
   add_cube(scene);
 
@@ -172,19 +275,28 @@ function generate_random() {
   mitchellWorker.onmessage = function(event) {
     var circle = event.data[0];
 
-    document.getElementById('minRadius').innerText = (100 * event.data[1]).toFixed(2);
+    // document.getElementById('minRadius').innerText = (100 * event.data[1]).toFixed(2);
 
     if (circle == 'finished') {
-      scene.add(new THREE.Mesh(masterGeom, masterMat));
-      document.getElementById('minRadius').innerText = event.data[2];
+      // scene.add(new THREE.Mesh(masterGeom, masterMat));
+      // document.getElementById('minRadius').innerText = event.data[2];
       masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, vertical, masterObject.loadDir);
 
       var error = ((event.data[1] - 1)*100).toFixed(3);
       var logMsg = document.createElement('h1');
+      masterObject.error = Number(error);
       logMsg.innerHTML = "Error: " + error + "%";
       var bottom = document.createElement('h5');
       bottom.innerHTML = "greater than required volume fraction";
-      alertify.log(logMsg.outerHTML + bottom.outerHTML);
+      // alertify.log(logMsg.outerHTML + bottom.outerHTML);
+
+      var tempArray = [masterObject.numFibres, masterObject.volumeFraction,
+          masterObject.error, event.data[3], maxRadius];
+
+      masterObject.currentValues = tempArray.map((tempArray, i) => tempArray + masterObject.currentValues[i]);
+
+
+      testCallback(current_step);
 
     }
     else {
@@ -223,7 +335,7 @@ function generate_cubic() {
   var height = masterObject.lengthMatrix = ratio * width;
   var radius = Math.sqrt(volumeFraction * height * width / (Math.PI * numFibres));
 
-  scene = add_scene();
+  // scene = add_scene();
   masterGeom = new THREE.Geometry();
   add_cube(scene);
 
@@ -242,7 +354,7 @@ function generate_cubic() {
     }
   }
 
-  scene.add(new THREE.Mesh(masterGeom, masterMat));
+  // scene.add(new THREE.Mesh(masterGeom, masterMat));
   masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, depth, masterObject.loadDir);
 
 }
@@ -279,7 +391,7 @@ function generate_hex() {
 
   masterObject.padding = maxRadius - radius;
 
-  scene = add_scene();
+  // scene = add_scene();
   masterGeom = new THREE.Geometry();
   add_cube(scene);
 
@@ -295,7 +407,7 @@ function generate_hex() {
     }
   }
 
-  scene.add(new THREE.Mesh(masterGeom, masterMat));
+  // scene.add(new THREE.Mesh(masterGeom, masterMat));
   masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, depth, masterObject.loadDir);
 }
 
@@ -341,7 +453,7 @@ function generate_upload_Image() {
   clearInterval(interval);
   $(document).off('keydown');
 
-  scene = add_scene();
+  // scene = add_scene();
   masterGeom = new THREE.Geometry();
   add_cube(scene);
 
@@ -359,14 +471,14 @@ function generate_upload_Image() {
     masterGeom.merge( ...add_fibre(row.x, row.y, radius));
   }
 
-  scene.add(new THREE.Mesh(masterGeom, masterMat));
+  // scene.add(new THREE.Mesh(masterGeom, masterMat));
   masterObject.volumeFraction = fibreArea / (masterObject.breadthMatrix * masterObject.lengthMatrix);
 
 }
 
 function generate_upload_CSVCenter() {
 
-  scene = add_scene();
+  // scene = add_scene();
   masterGeom = new THREE.Geometry();
   add_cube(scene);
 
@@ -383,7 +495,7 @@ function generate_upload_CSVCenter() {
     masterGeom.merge( ...add_fibre(row[1], row[2], row[0]));
   }
 
-  scene.add(new THREE.Mesh(masterGeom, masterMat));
+  // scene.add(new THREE.Mesh(masterGeom, masterMat));
 
 }
 
@@ -395,7 +507,7 @@ function generate_upload_CSVThree() {
   var height = masterObject.lengthMatrix;
   var width = masterObject.breadthMatrix
 
-  scene = add_scene();
+  // scene = add_scene();
   masterGeom = new THREE.Geometry();
   add_cube(scene);
 
@@ -415,7 +527,7 @@ function generate_upload_CSVThree() {
     masterGeom.merge( ...add_fibre(circle.x, circle.y, circle.getRadius()));
   }
 
-  scene.add(new THREE.Mesh(masterGeom, masterMat));
+  // scene.add(new THREE.Mesh(masterGeom, masterMat));
 
 }
 
@@ -507,8 +619,6 @@ function add_scene() {
 
   if (!timer) {
     animate();
-    console.log(timer);
-    console.log(animationId);
   } else {
     cancelAnimationFrame(animationId);
     clearTimeout(timer);
@@ -525,7 +635,7 @@ function add_cube(scene) {
     depth = masterObject.depthMatrix;
 
   var axisHelper = new THREE.AxisHelper(1.5 * Math.max(length, breadth, depth));
-  scene.add(axisHelper);
+  // scene.add(axisHelper);
 
   var geometry = new THREE.BoxGeometry(breadth, length, depth);
   var material = new THREE.MeshBasicMaterial({
@@ -537,16 +647,16 @@ function add_cube(scene) {
   var line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
     color: 0xffffff
   }));
-  scene.add(line);
+  // scene.add(line);
   var cube = new THREE.Mesh(geometry, material);
   cube.name = 'Matrix';
-  scene.add(cube);
+  // scene.add(cube);
 
   line.position.set(breadth / 2, length / 2, depth / 2);
   cube.position.set(breadth / 2, length / 2, depth / 2);
 
   add_arrow(breadth, length, depth).forEach(function(element) {
-    scene.add(element);
+    // scene.add(element);
   });
 
 }

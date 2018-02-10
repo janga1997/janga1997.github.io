@@ -33,9 +33,50 @@
         <div class="four columns">
           <form onsubmit="getFile(); return false">
             <div class="row" style="text-align: center;">
-              <label for="uploadFile" style="font-size: larger;"> Upload Data </label>
-              <input type="checkbox" id="uploadFile" v-model="uploadFile" v-on:change="clearEverything" style="zoom:2">
+              <div class="six columns">
+                <label for="uploadFile" style="font-size: larger;"> Upload Data </label>
+                <input type="checkbox" id="uploadFile" v-model="uploadFile" v-on:change="clearEverything" style="zoom:2">
+              </div>
+              <div class="six columns">
+                <label for="simulation" style="font-size: larger;"> Simulation </label>
+                <input type="checkbox" id="simulation" v-model="simulation" v-on:change="clearEverything" style="zoom:2">
+              </div>
             </div>
+
+            <div id="simDiv" v-if="!uploadFile & simulation">
+              <hr>
+              <div class="row">
+                <div class="six columns offset-by-three">
+                  <label for="simParam">Packing Type</label>
+                  <select class="u-full-width" id="simParam" v-model="simParam" v-on:change="paramChange">
+                    <option value="numFibres">Number of Fibres</option>
+                    <option value="volumeFraction">Volume Fraction</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="four columns">
+                  <label for="startVal">Start Value</label>
+                  <input class="u-full-width" type="number" min="0" step="any" v-model.number="startVal" placeholder="0.5" id="startVal" required >
+                </div>
+                <div class="four columns">
+                  <label for="endVal">End Value</label>
+                  <input class="u-full-width" type="number" :min="startVal" step="any" v-model.number="endVal" placeholder="0.5" id="endVal" required >
+                </div>
+                <div class="four columns">
+                  <label for="stepVal">Value</label>
+                  <input class="u-full-width" type="number" min="0" :max="endVal - startVal" step="any" v-model.number="stepVal" id="stepVal" required >
+                </div>
+              </div>
+              <div class="row">
+                <div class="six columns offset-by-three">
+                  <label for="numSamples">Number of Samples</label>
+                  <input class="u-full-width" type="number" min="0" v-model.number="numSamples" placeholder="20" id="numSamples" required v-if="!uploadFile & simulation">
+                </div>
+              </div>
+              <button type="button" style="margin-left: 30%" class="button-primary" v-if="!uploadFile" id="buttonSim" onclick="generate_simulation()">Generate Simulation</button>
+            </div>
+
             <hr>
             <div class="row">
               <div class="six columns" v-if="!uploadFile">
@@ -160,6 +201,8 @@
         </div>
         <div class="eight columns" style="position: -webkit-sticky; position: sticky; top: 0px;">
           <p style="text-align: center;font-size: x-large;" id="minRadius"></p>
+          <button onclick="selectCSV()">Copy Table</button>
+          <textarea id="csvText" v-model='csvText'></textarea>
           <div id="svgCS" style="text-align: right;"></div>
         </div>
       </div>
