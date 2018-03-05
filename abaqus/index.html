@@ -45,13 +45,27 @@
 
             <div id="simDiv" v-if="!uploadFile & simulation">
               <hr>
-              <div class="row">
+              <div class="row" style="text-align: center;">
                 <div class="six columns offset-by-three">
+                  <label for="randomType" style="font-size: larger;"> Random Type </label>
+                  <input type="checkbox" id="randomType" v-model="randomType" style="zoom:2">
+                </div>         
+              </div>
+              <div class="row">
+                <div class="four columns">
+                  <label for="minRatio">Min Ratio</label>
+                  <input class="u-full-width" type="number" min="0.1" step="0.1" max="1" v-model.number="minRatio" id="minRatio" required >
+                </div>
+                <div class="four columns">
                   <label for="simParam">Packing Type</label>
                   <select class="u-full-width" id="simParam" v-model="simParam" v-on:change="paramChange">
                     <option value="numFibres">Number of Fibres</option>
                     <option value="volumeFraction">Volume Fraction</option>
                   </select>
+                </div>
+                <div class="four columns">
+                  <label for="mitchellSamples">Value</label>
+                  <input class="u-full-width" type="number" min="1" step="1" v-if="!randomType" v-model.number="mitchellSamples" id="mitchellSamples" required >
                 </div>
               </div>
               <div class="row">
@@ -211,6 +225,7 @@
     <script type="text/javascript" src="js/libs/FileSaver.min.js"></script>
     <script type="text/javascript" src="js/libs/d3.v4.min.js"></script>
     <script type="text/javascript" src="js/libs/d3-quadtree.v1.min.js"></script>
+    <script type="text/javascript" src="js/libs/d3-array.min.js"></script>
     <script type="text/javascript" src="js/libs/three.min.js"></script>
     <script type="text/javascript" src="js/libs/TrackballControls.min.js"></script>
     <script type="text/javascript" src="js/libs/vue.min.js"></script>

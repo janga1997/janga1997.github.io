@@ -4,26 +4,23 @@ var newCircle, generatedArea = 0, tempArea = 0, k = 10;
 
 onmessage = function(e) {
   var data = e.data;
-  var maxRadius = data[0], width = data[1], height = data[2], fibreArea = data[3], smallFib = data[4];
+  var maxRadius = data[0], width = data[1], height = data[2], fibreArea = data[3], minRatio = data[4], mitchellSamples = data[5],
+    randomType = data[6];
+
   newCircle = bestCircleGenerator(1.05 * maxRadius, 0.05 * maxRadius, width, height);
-  mitchell(fibreArea, width, height, maxRadius, smallFib);
+  mitchell(fibreArea, width, height, maxRadius, minRatio, mitchellSamples, randomType);
 }
 
-function mitchell(fibreArea, width, height, maxRadius, smallFib) {
+function mitchell(fibreArea, width, height, maxRadius, minRatio, mitchellSamples, randomType) {
 
   var count = 1;
   var minRadius = maxRadius;
+  // var circle = new Array(3).fill(0);
 
-  while (fibreArea > generatedArea) {
+  while (fibreArea > generatedArea && minRadius >= minRatio*maxRadius) {
 
     var circle = newCircle(k);
     count++;
-
-    if (!smallFib) {
-      if (circle[2] < maxRadius) {
-      break;
-      }
-    }
 
     tempArea = removeArea(circle, width, height);
     generatedArea += tempArea;
@@ -32,7 +29,12 @@ function mitchell(fibreArea, width, height, maxRadius, smallFib) {
 
     postMessage([circle, generatedArea/fibreArea]);
 
-    k = 10 * count;
+    if (randomType) {
+      k = 100*count;
+    } else {
+      k = mitchellSamples;
+    }
+
   }
 
   var message = "Minimum Radius: " + minRadius.toFixed(5) + " |||| Maximum Radius: " + maxRadius.toFixed(5);

@@ -5,7 +5,7 @@ var animationId, scene, masterGeom, masterMat = new THREE.MeshBasicMaterial({
   }), arrowHelpers, mitchellWorker;
 var d3Timer;
 var tempCircle = [];
-var interval;
+var interval, totalData = {'data': []};
 
 var params = {'volumeFraction': 1, 'numFibres': 100};
 
@@ -34,6 +34,11 @@ var masterObject = new Vue({
     currentSample: 1,
     currentValues: new Array(5).fill(0),
     csvText: '',
+
+    mitchellSamples: 10,
+    randomType: true,
+    errorArray: [],
+    minRatio: 0.5,
 
     numFibres: 50,
     fibreYM: 72000,
@@ -173,6 +178,8 @@ function generate_simulation() {
   masterObject[masterObject.simParam] = masterObject.startVal;
   masterObject.currentIteration = 1;
 
+  totalData.data = [];
+
   document.getElementById('svgCS').innerHTML = '';
 
   var table = document.createElement('table');
@@ -181,7 +188,7 @@ function generate_simulation() {
   table.children[0].append(document.createElement('tr'));
   table.append(document.createElement('tbody'));
 
-  masterObject.columns = ['NumberFibres', 'Vol.Fraction', 'Error', 'SmallFibre', 'LargeFibre'];
+  masterObject.columns = ['NumberFibres', 'Vol.Fraction', 'Error', 'SmallFibre', 'LargeFibre', 'Std.Error'];
 
   masterObject.columns.forEach(function (item) {
     var dummy = document.createElement('th');
@@ -203,6 +210,10 @@ function param_step() {
 
     masterObject.currentSample = 1;
     masterObject.currentValues = new Array(5).fill(0);
+    masterObject.errorArray = [];
+
+    totalData.data.push(JSON.parse(JSON.stringify(masterObject.$data)));
+
     current_step();
 
   }
@@ -214,13 +225,18 @@ function param_results(testCallback) {
 
   masterObject.currentValues = masterObject.currentValues.map( (item) => (item/masterObject.numSamples).toFixed(4) );
 
-  masterObject.csvText += masterObject.currentValues.reduce( (prev, curr) => (prev + ',' + curr) ) + '\n';
+  masterObject.csvText += masterObject.currentValues.reduce( (prev, curr) => (prev + ',' + curr) );
+  masterObject.csvText += ',' + (d3.deviation(masterObject.errorArray)).toFixed(4) + '\n';
 
   masterObject.currentValues.forEach(function (item) {
     var dummy = document.createElement('td');
     dummy.innerText = item;
     row.append(dummy);
   });
+
+  var dummy = document.createElement('td');
+  dummy.innerText = d3.deviation(masterObject.errorArray).toFixed(4);
+  row.append(dummy);
 
   document.getElementById('results_table').children[1].append(row);
 
@@ -270,7 +286,7 @@ function generate_random(testCallback) {
   masterObject.generatedCenters = [];
 
   mitchellWorker = new Worker('js/worker.js');
-  mitchellWorker.postMessage([maxRadius, width, height, fibreArea, masterObject.smallFib]);
+  mitchellWorker.postMessage([maxRadius, width, height, fibreArea, masterObject.minRatio, masterObject.mitchellSamples, masterObject.randomType]);
 
   mitchellWorker.onmessage = function(event) {
     var circle = event.data[0];
@@ -290,11 +306,15 @@ function generate_random(testCallback) {
       bottom.innerHTML = "greater than required volume fraction";
       // alertify.log(logMsg.outerHTML + bottom.outerHTML);
 
+
       var tempArray = [masterObject.numFibres, masterObject.volumeFraction,
-          masterObject.error, event.data[3], maxRadius];
+          Math.abs(masterObject.error), event.data[3], maxRadius];
+      masterObject.errorArray.push(Math.abs(masterObject.error));
 
-      masterObject.currentValues = tempArray.map((tempArray, i) => tempArray + masterObject.currentValues[i]);
+      masterObject.currentValues = tempArray.map((temp, i) => temp + masterObject.currentValues[i]);
 
+      tempArray = tempArray.map( (item) => (item).toFixed(4) );
+      // masterObject.csvText += tempArray.reduce( (prev, curr) => (prev + ',' + curr) ) + '\n';
 
       testCallback(current_step);
 
