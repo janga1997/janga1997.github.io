@@ -1,5 +1,5 @@
 var timer;
-var animationId, scene, masterGeom, masterMat = new THREE.MeshBasicMaterial({
+var animationId, scene, masterGeom, cubeGeometry, masterMat = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     opacity: 0
   }), arrowHelpers, mitchellWorker;
@@ -157,6 +157,7 @@ function generate_random() {
   var minRadius = maxRadius;
 
   masterObject.padding = 0.1 * maxRadius;
+  masterObject.meshSeed = Math.round(8*masterObject.padding * 10**4 ) / 10**4;
 
   var fibreArea = volumeFraction * (width) * (height);
 
@@ -166,7 +167,7 @@ function generate_random() {
 
   masterObject.generatedCenters = [];
 
-  mitchellWorker = new Worker('js/worker.js');
+  mitchellWorker = new Worker('js/2Dworker.js');
   mitchellWorker.postMessage([maxRadius, width, height, fibreArea, masterObject.smallFib]);
 
   mitchellWorker.onmessage = function(event) {
@@ -175,7 +176,11 @@ function generate_random() {
     document.getElementById('minRadius').innerText = (100 * event.data[1]).toFixed(2);
 
     if (circle == 'finished') {
-      scene.add(new THREE.Mesh(masterGeom, masterMat));
+      master_bsp = new ThreeBSP(masterGeom);
+      cube_bsp = new ThreeBSP(cubeGeometry);
+
+      scene.add(cube_bsp.intersect(master_bsp).toMesh(masterMat));
+      // scene.add(new THREE.Mesh(masterGeom, masterMat));
       document.getElementById('minRadius').innerText = event.data[2];
       masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, vertical, masterObject.loadDir);
 
@@ -190,6 +195,63 @@ function generate_random() {
     else {
       masterObject.generatedCenters.push([circle[0], circle[1], circle[2]]);
       masterGeom.merge( ...add_fibre(circle[0], circle[1], circle[2]) );
+    }
+  };
+
+}
+
+function generate_random3D() {
+  var completed = false;
+  var height = masterObject.lengthMatrix;
+  var width = masterObject.breadthMatrix;
+  var vertical = masterObject.depthMatrix;
+
+  var numFibres = masterObject.numFibres;
+  var volumeFraction = masterObject.volumeFraction;
+
+  var maxRadius = Math.pow(volumeFraction * height * width * vertical/ ((4/3) * Math.PI * numFibres), 1/3);
+  var minRadius = maxRadius;
+
+  masterObject.padding = 0.1 * maxRadius;
+  masterObject.meshSeed = Math.round(8*masterObject.padding * 10**4 ) / 10**4;
+
+  var fibreVolume = volumeFraction * (width) * (height) * vertical;
+
+  scene = add_scene();
+  masterGeom = new THREE.Geometry();
+  add_cube(scene);
+
+  masterObject.generatedCenters = [];
+
+  mitchellWorker = new Worker('js/3Dworker.js');
+  mitchellWorker.postMessage([maxRadius, width, height, vertical, fibreVolume, masterObject.smallFib]);
+
+  mitchellWorker.onmessage = function(event) {
+    var sphere = event.data[0];
+
+    document.getElementById('minRadius').innerText = (100 * event.data[1]).toFixed(2);
+
+    if (sphere == 'finished') {
+      master_bsp = new ThreeBSP(masterGeom);
+      cube_bsp = new ThreeBSP(cubeGeometry);
+
+      scene.add(cube_bsp.intersect(master_bsp).toMesh(masterMat));
+
+      // scene.add(new THREE.Mesh(masterGeom, masterMat));
+      document.getElementById('minRadius').innerText = event.data[2];
+      // masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, vertical, masterObject.loadDir);
+
+      var error = ((event.data[1] - 1)*100).toFixed(3);
+      var logMsg = document.createElement('h1');
+      logMsg.innerHTML = "Error: " + error + "%";
+      var bottom = document.createElement('h5');
+      bottom.innerHTML = "greater than required volume fraction";
+      alertify.log(logMsg.outerHTML + bottom.outerHTML);
+
+    }
+    else {
+      masterObject.generatedCenters.push([sphere[0], sphere[1], sphere[2], sphere[3]]);
+      masterGeom.merge( ...add_sphere_fibre(sphere[0], sphere[1], sphere[2], sphere[3]) );
     }
   };
 
@@ -527,23 +589,25 @@ function add_cube(scene) {
   var axisHelper = new THREE.AxisHelper(1.5 * Math.max(length, breadth, depth));
   scene.add(axisHelper);
 
-  var geometry = new THREE.BoxGeometry(breadth, length, depth);
+  cubeGeometry = new THREE.BoxGeometry(breadth, length, depth);
+  cubeGeometry.translate(breadth/2, length/2, depth/2);
   var material = new THREE.MeshBasicMaterial({
     color: 0x2F4F4F,
-    opacity: 0.95,
+    opacity: 0.9,
     transparent: true
   });
-  var edges = new THREE.EdgesGeometry(geometry);
+  var edges = new THREE.EdgesGeometry(cubeGeometry);
   var line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
     color: 0xffffff
   }));
   scene.add(line);
-  var cube = new THREE.Mesh(geometry, material);
+  var cube = new THREE.Mesh(cubeGeometry, material);
   cube.name = 'Matrix';
+  cube.scale.set(0.999, 0.999, 0.99);
   scene.add(cube);
 
-  line.position.set(breadth / 2, length / 2, depth / 2);
-  cube.position.set(breadth / 2, length / 2, depth / 2);
+  // line.position.set(breadth / 2, length / 2, depth / 2);
+  // cube.position.set(breadth / 2, length / 2, depth / 2);
 
   add_arrow(breadth, length, depth).forEach(function(element) {
     scene.add(element);
@@ -571,11 +635,22 @@ function add_arrow(breadth, length, depth) {
 
 }
 
+function add_sphere_fibre(x, y, z, radius) {
+	var geometry = new THREE.SphereGeometry(radius);
+  var matrix = new THREE.Matrix4();
+  matrix.setPosition(new THREE.Vector3( x, y, z ));
+
+  return [geometry, matrix];
+
+}
+
 function add_fibre(x, y, radius) {
 
   var depth = Number(masterObject.depthMatrix);
 
   var geometry = new THREE.CylinderGeometry(radius, radius, 1.01 * depth, 20);
+  var geometry_bsp = new ThreeBSP(geometry);
+
   var matrix = new THREE.Matrix4();
   matrix.makeRotationX( Math.PI/2 ).setPosition(new THREE.Vector3( x, y, depth/2 ));
 

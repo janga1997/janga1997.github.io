@@ -1,11 +1,14 @@
-importScripts('../js/libs/d3.v4.min.js', '../js/libs/d3-quadtree.v1.min.js')
+importScripts('../js/libs/d3.v4.min.js', '../js/libs/d3-quadtree.v1.min.js', '../js/libs/csg.js')
 
-var newCircle, generatedArea = 0, tempArea = 0, k = 10;
+var newCircle, generatedArea = 0, tempArea = 0, k = 10, totalArea;
 
 onmessage = function(e) {
   var data = e.data;
   var maxRadius = data[0], width = data[1], height = data[2], fibreArea = data[3], smallFib = data[4];
   newCircle = bestCircleGenerator(1.05 * maxRadius, 0.05 * maxRadius, width, height);
+  
+  totalArea = janga.CAG.rectangle({corner1: [0, 0], corner2: [width, height]});
+
   mitchell(fibreArea, width, height, maxRadius, smallFib);
 }
 
@@ -123,28 +126,14 @@ function removeArea(circle, width, height) {
   return area;
 
   function approxArea(circle, width, height) {
-    var randomPoints = [];
 
-    for (var i = 0; i <= width; i++) {
-      for (var j = 0; j <= height; j++) {
-        randomPoints.push([i, j]);
-      }
+    if (!totalArea) {
+      totalArea = janga.CAG.rectangle({corner1: [0, 0], corner2: [width, height]});
     }
 
-    for (var i = 0.5; i < width; i += 0.5) {
-      for (var j = 0.5; j < height; j += 0.5) {
-        randomPoints.push([i, j]);
-      }
-    }
+    var currentCircle = janga.CAG.circle({center: circle.slice(0, 2), radius: radius, resolution: 200});
 
-    var inPoints = randomPoints.filter(function(point) {
-      var dx = point[0] - circle[0],
-        dy = point[1] - circle[1];
-
-      return Math.sqrt(dx * dx + dy * dy) <= circle[2];
-    });
-
-    return width * height * inPoints.length / randomPoints.length;
+    return totalArea.intersect(currentCircle).area();
 
   }
 }

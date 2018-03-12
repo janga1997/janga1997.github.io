@@ -41,7 +41,8 @@
               <div class="six columns" v-if="!uploadFile">
                 <label for="packingType">Packing Type</label>
                 <select class="u-full-width" id="packingType" v-model="packingType">
-                  <option value="random">Random</option>
+                  <option value="random">Random 2D</option>
+                  <option value="random3D">Random 3D</option>
                   <option value="cubic">Cubic</option>
                   <option value="hex">Hexagonal</option>
                 </select>
@@ -169,6 +170,7 @@
     <script type="text/javascript" src="js/libs/d3.v4.min.js"></script>
     <script type="text/javascript" src="js/libs/d3-quadtree.v1.min.js"></script>
     <script type="text/javascript" src="js/libs/three.min.js"></script>
+    <script type="text/javascript" src="js/libs/ThreeCSG.js"></script>
     <script type="text/javascript" src="js/libs/TrackballControls.min.js"></script>
     <script type="text/javascript" src="js/libs/vue.min.js"></script>
     <script type="text/javascript" src="js/libs/jquery-3.2.1.min.js"></script>
