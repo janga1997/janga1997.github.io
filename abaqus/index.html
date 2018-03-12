@@ -55,7 +55,7 @@
                   <option value="Image">Image</option>
                 </select>
               </div>
-              <div class="six columns" v-if="packingType == 'random' && !uploadFile">
+              <div class="six columns" v-if="packingType.slice(0, 6) == 'random' && !uploadFile">
                 <label for="smallFib">Smaller Fibres</label>
                 <input type="checkbox" id="smallFib" v-model="smallFib" style="zoom:2">
               </div>
@@ -72,7 +72,7 @@
                 <label for="breadthMatrix">Breadth</label>
                 <input type="number" id="breadthMatrix" min="0" step="any" v-model.number="breadthMatrix">
               </div>
-              <div class="four columns" v-if="packingType == 'random' || uploadFile">
+              <div class="four columns" v-if="packingType.slice(0, 6) == 'random' || uploadFile">
                 <label for="lengthMatrix">Length</label>
                 <input type="number" id="lengthMatrix" min="0" step="any" v-model.number="lengthMatrix">
               </div>
@@ -97,7 +97,7 @@
 
             <button type="button" style="margin-left: 30%" class="button-primary" v-if="!uploadFile" id="buttonCS" :onclick="'generate_' + packingType + '()'">Generate Cross Section</button>
             <button type="button" style="margin-left: 30%" class="button-primary" v-if="uploadFile" :onclick="'generate_upload_' + imageData + '()'">Generate Cross Section</button>
-            <button type="button" style="margin-left: 30%" class="button-primary" v-if="!uploadFile & packingType == 'random'" id="kill" onclick="killWorker()">Stop Process</button>
+            <button type="button" style="margin-left: 30%" class="button-primary" v-if="!uploadFile & packingType.slice(0, 6) == 'random'" id="kill" onclick="killWorker()">Stop Process</button>
 
             <hr>
 
