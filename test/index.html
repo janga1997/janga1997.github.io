@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+canvas {
+  background: #dcdcdc;
+}
+
+circle {
+  fill: #fff;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+body {
+  background: grey;
+}
+
+</style>
+<body>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-timer.v1.min.js"></script>
+<script src="https://d3js.org/d3-quadtree.v1.min.js"></script>
+<script src="csg.js"></script>
+<script>
+
+var volumeFraction = 0.7,
+    width = 500,
+    height = 500;
+
+var k = 1, // initial number of candidates to consider per circle
+    n = 100, count = 1, master = 0;
+
+var fibreArea = volumeFraction * width * height,
+    generatedArea = 0,
+    maxRadius = Math.sqrt(fibreArea/(n * Math.PI)),
+    minRadius = maxRadius
+    padding = 0.1*maxRadius;
+
+var newCircle = bestCircleGenerator(1.05 * maxRadius, 0.05 * maxRadius, width, height);
+
+var ctx = d3.select("body").append("canvas")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("id", "animate");
+
+var c = document.getElementById("animate");
+ctx = c.getContext("2d");
+
+var nodes = [];
+var copyNodes = [];
+
+var janTimer = d3.timer(function() {
+
+    var completed = (generatedArea*100/fibreArea);
+
+    var circle = newCircle(k);
+    nodes.push({id: count, x: circle[0], y: circle[1], r: maxRadius});
+    copyNodes.push({id: count, x: circle[0], y: circle[1], r: maxRadius});
+
+    minRadius = Math.min(maxRadius, circle[2]);
+
+    if (count >= n) {
+      janTimer.stop();
+
+      console.log(nodes);
+
+      var simulation = d3.forceSimulation(nodes)
+          .force("collide", collide)
+          // .force("collide", d3.forceCollide().radius(function(d) { return 1.05*d.r; }).iterations(2))
+          .on("tick", ticked);
+    }
+
+    ctx.beginPath();
+    ctx.arc(circle[0], circle[1], maxRadius, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+
+    k = 100 * (count + 1);
+    count += 1;
+});
+
+function bestCircleGenerator(maxRadius, padding, width, height) {
+  var quadtree = d3.quadtree().extent([
+      [0, 0],
+      [width, height]
+    ]),
+    searchRadius = maxRadius * 2,
+    maxRadius2 = maxRadius * maxRadius;
+
+  return function(k) {
+    var bestX, bestY, bestDistance = 0;
+
+    for (var i = 0; i < k || bestDistance < padding; ++i) {
+
+      master += 1;
+
+      var x = Math.random() * width,
+          y = Math.random() * height,
+          rx1 = x - searchRadius,
+          rx2 = x + searchRadius,
+          ry1 = y - searchRadius,
+          ry2 = y + searchRadius,
+          minDistance = maxRadius; // minimum distance for this candidate
+
+      quadtree.visit(function(quad, x1, y1, x2, y2) {
+        if (p = quad.data) {
+          var p,
+              dx = x - p[0],
+              dy = y - p[1],
+              d2 = dx * dx + dy * dy,
+              d = Math.sqrt(d2);
+	        if (d < maxRadius) return minDistance = 0, true; // within a circle
+          if (d < minDistance) minDistance = d;
+        }
+        return !minDistance || x1 > rx2 || x2 < rx1 || y1 > ry2 || y2 < ry1; // or outside search radius
+      });
+
+      if (minDistance > bestDistance) bestX = x, bestY = y, bestDistance = minDistance;
+    }
+
+    var best = [bestX, bestY, bestDistance - padding];
+    quadtree.add(best);
+    return best;
+  };
+}
+
+function collide(alpha) {
+  var quadtree = d3.quadtree()
+      .x((d) => d.x)
+      .y((d) => d.y)
+      .addAll(nodes);
+
+  nodes.forEach(function(d) {
+    var r = d.r + maxRadius + padding,
+        nx1 = d.x - r,
+        nx2 = d.x + r,
+        ny1 = d.y - r,
+        ny2 = d.y + r;
+    quadtree.visit(function(quad, x1, y1, x2, y2) {
+
+      if (quad.data && (quad.data !== d)) {
+        var x = d.x - quad.data.x,
+            y = d.y - quad.data.y,
+            l = Math.sqrt(x * x + y * y),
+            r = d.r + quad.data.r + padding;
+        if (l < r) {
+          l = (l - r) / l * alpha;
+          d.x -= x *= l;
+          d.y -= y *= l;
+          quad.data.x += x;
+          quad.data.y += y;
+        }
+      }
+      return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+    });
+  });
+
+
+}
+
+function ticked(d) {
+  ctx.clearRect(0, 0, width, height);
+  ctx.save();
+
+  ctx.beginPath();
+  nodes.forEach(function(d) {
+
+  	d.x = Math.max(maxRadius, Math.min(width - maxRadius, d.x));
+  	d.y = Math.max(maxRadius, Math.min(height - maxRadius, d.y));
+
+    ctx.moveTo(d.x + d.r, d.y);
+    ctx.arc(d.x, d.y, d.r, 0, 2*Math.PI);
+
+  });
+
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+</script>
