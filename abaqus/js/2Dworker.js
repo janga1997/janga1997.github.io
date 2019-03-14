@@ -40,7 +40,7 @@ function mitchell(fibreArea, width, height, maxRadius, smallFib) {
 
   var message = `Minimum Radius: ${minRadius.toFixed(5)} ||\
                  Maximum Radius: ${maxRadius.toFixed(5)} ||\
-                 Error: ${((generatedArea/fibreArea-1)*100).toFixed(3)}`;
+                 Error: ${((generatedArea/fibreArea-1)*100).toFixed(3)}%`;
   postMessage(['finished', message]);
 
   close();
