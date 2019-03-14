@@ -31,7 +31,7 @@ var masterObject = new Vue({
     padding: Infinity,
     uploadFile: false,
     imageData: "Image",
-    fileName: "sample.py"
+    fileName: "sample"
   },
   methods: {
     parseCSV: function(event) {
@@ -181,15 +181,8 @@ function generate_random() {
 
       scene.add(cube_bsp.intersect(master_bsp).toMesh(masterMat));
       // scene.add(new THREE.Mesh(masterGeom, masterMat));
-      document.getElementById('minRadius').innerText = event.data[2];
+      document.getElementById('minRadius').innerText = event.data[1];
       masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, vertical, masterObject.loadDir);
-
-      var error = ((event.data[1] - 1)*100).toFixed(3);
-      var logMsg = document.createElement('h1');
-      logMsg.innerHTML = "Error: " + error + "%";
-      var bottom = document.createElement('h5');
-      bottom.innerHTML = "greater than required volume fraction";
-      alertify.log(logMsg.outerHTML + bottom.outerHTML);
 
     }
     else {
@@ -238,15 +231,8 @@ function generate_random3D() {
       scene.add(cube_bsp.intersect(master_bsp).toMesh(masterMat));
 
       // scene.add(new THREE.Mesh(masterGeom, masterMat));
-      document.getElementById('minRadius').innerText = event.data[2];
+      document.getElementById('minRadius').innerText = event.data[1];
       // masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, vertical, masterObject.loadDir);
-
-      var error = ((event.data[1] - 1)*100).toFixed(3);
-      var logMsg = document.createElement('h1');
-      logMsg.innerHTML = "Error: " + error + "%";
-      var bottom = document.createElement('h5');
-      bottom.innerHTML = "greater than required volume fraction";
-      alertify.log(logMsg.outerHTML + bottom.outerHTML);
 
     }
     else {
@@ -481,13 +467,6 @@ function generate_upload_CSVThree() {
 
 }
 
-function alertAbaqus() {
-  // body...
-  var msg = "<h3>Error : 0.1 %</h3>" +
-    "<p>greater than the required fibre area</p>";
-  alertify.log(msg);
-}
-
 function getFactors(num) {
   const isEven = num % 2 === 0;
   let inc = isEven ? 1 : 2;
@@ -680,7 +659,7 @@ function change_arrow(breadth, length, depth) {
 }
 
 function getFile() {
-  var fileObject = {};
+  let fileObject = {};
 
   fileObject = masterObject.$data;
 
@@ -689,6 +668,15 @@ function getFile() {
 
   fileObject = pythonFile + fileObject;
   fileObject += '\nautomateMicro(json.loads(data))';
-  var file = new File([fileObject], masterObject.fileName);
+  let file = new File([fileObject], masterObject.fileName+'.py');
   saveAs(file);
+}
+
+function getData() {
+  let fileObject = masterObject.generatedCenters.map(x => x.join(',')).join('\n');
+  fileObject = 'x,y,r\n' + fileObject;
+
+  let file = new File([fileObject], masterObject.fileName+'.txt');
+  saveAs(file);
+
 }

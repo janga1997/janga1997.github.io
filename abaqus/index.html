@@ -31,7 +31,7 @@
     <div class="container" id="masterAbaqus" style="min-width: 90vw">
       <div class="row">
         <div class="four columns">
-          <form onsubmit="getFile(); return false">
+          <form onsubmit="return false">
             <div class="row" style="text-align: center;">
               <label for="uploadFile" style="font-size: larger;"> Upload Data </label>
               <input type="checkbox" id="uploadFile" v-model="uploadFile" v-on:change="clearEverything" style="zoom:2">
@@ -156,7 +156,9 @@
               </div>
             </div>
 
-            <button type="submit" style="margin-left: 40%" class="button-primary">Generate File</button>
+            <button onclick="getFile()" class="button-primary">Generate .PY Script</button>
+            <button onclick="getData()" class="button-primary">Generate Data</button>
+
           </form>
         </div>
         <div class="eight columns" style="position: -webkit-sticky; position: sticky; top: 0px;">
