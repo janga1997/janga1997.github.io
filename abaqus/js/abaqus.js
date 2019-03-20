@@ -674,7 +674,7 @@ function getFile() {
 
 function getData() {
   let fileObject = masterObject.generatedCenters.map(x => x.join(',')).join('\r\n');
-  fileObject = 'x,y,r\n' + fileObject;
+  fileObject = 'x,y,r\r\n' + fileObject;
 
   let file = new File([fileObject], masterObject.fileName+'.txt');
   saveAs(file);
