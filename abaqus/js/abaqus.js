@@ -1,11 +1,10 @@
-var timer;
-var animationId, scene, masterGeom, cubeGeometry, masterMat = new THREE.MeshBasicMaterial({
+var timer, animationId, scene,
+masterGeom, cubeGeometry,
+masterMat = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     opacity: 0
-  }), arrowHelpers, mitchellWorker;
-var d3Timer;
-var tempCircle = [];
-var interval;
+  }), arrowHelpers, mitchellWorker,
+d3Timer, tempCircle = [], interval;
 
 var masterObject = new Vue({
   el: "#masterAbaqus",
