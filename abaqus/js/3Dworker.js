@@ -13,7 +13,6 @@ onmessage = function(e) {
     fibreVolume = data[4],
     smallFib = data[5];
 
-    console.log('Janga REdd');
   newSphere = bestSphereGenerator(1.05 * maxRadius, 0.05 * maxRadius, width, height, depth);
 
   totalVolume = janga.CSG.cube({corner1: [0, 0, 0], corner2: [width, height, depth]});
@@ -31,8 +30,6 @@ function mitchell(fibreVolume, width, height, depth, maxRadius, smallFib) {
     var sphere = newSphere(k);
     console.log(sphere);
     count++;
-
-    // console.log(count);
 
     if (!smallFib) {
       if (sphere[3] < maxRadius) {

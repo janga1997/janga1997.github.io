@@ -4,7 +4,12 @@ var newCircle, generatedArea = 0, tempArea = 0, k = 10, totalArea;
 
 onmessage = function(e) {
   var data = e.data;
-  var maxRadius = data[0], width = data[1], height = data[2], fibreArea = data[3], smallFib = data[4];
+  var maxRadius = data[0],
+    width = data[1],
+    height = data[2],
+    fibreArea = data[3],
+    smallFib = data[4];
+
   newCircle = bestCircleGenerator(1.05 * maxRadius, 0.05 * maxRadius, width, height);
   
   totalArea = janga.CAG.rectangle({corner1: [0, 0], corner2: [width, height]});
