@@ -342,7 +342,10 @@ function generate_hex() {
     }
   }
 
-  scene.add(new THREE.Mesh(masterGeom, masterMat));
+  let master_bsp = new ThreeBSP(masterGeom);
+  let cube_bsp = new ThreeBSP(cubeGeometry);
+  scene.add(cube_bsp.intersect(master_bsp).toMesh(masterMat));
+
   masterObject.loadSurfaces = handleLoad(masterObject.generatedCenters, width, height, depth, masterObject.loadDir);
 }
 
