@@ -77,8 +77,8 @@ function bestCircleGenerator(maxRadius, padding, width, height) {
           var p,
             dx = x - p[0],
             dy = y - p[1],
-            d2 = dx * dx + dy * dy,
-            r2 = p[2] * p[2];
+            d2 = dx**2 + dy**2,
+            r2 = p[2]**2;
           if (d2 < r2) return minDistance = 0, true; // within a circle
           var d = Math.sqrt(d2) - p[2];
           if (d < minDistance) minDistance = d;

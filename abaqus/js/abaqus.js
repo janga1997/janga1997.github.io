@@ -628,9 +628,7 @@ function add_sphere_fibre(x, y, z, radius) {
 function add_fibre(x, y, radius) {
 
   var depth = Number(masterObject.depthMatrix);
-
   var geometry = new THREE.CylinderGeometry(radius, radius, 1.01 * depth, 20);
-  var geometry_bsp = new ThreeBSP(geometry);
 
   var matrix = new THREE.Matrix4();
   matrix.makeRotationX( Math.PI/2 ).setPosition(new THREE.Vector3( x, y, depth/2 ));
